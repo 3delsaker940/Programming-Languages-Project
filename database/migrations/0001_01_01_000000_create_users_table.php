@@ -12,12 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name');
-            $table->date('birthDate');
+            $table->date('birthdate');
             $table->string('number')->unique();
             $table->string('password');
-            $table->string('profile_photo_path');
-            $table->string('id_photo_path_front');
-            $table->string('id_photo_path_back');
+            $table->string('profile_photo');
+            $table->string('id_photo_front');
+            $table->string('id_photo_back');
             $table->enum('status', ['pending', 'rejected', 'frozen', 'active'])->default('pending');
             $table->enum('type', ['tenant', 'owner', 'admin']);
             $table->rememberToken();
