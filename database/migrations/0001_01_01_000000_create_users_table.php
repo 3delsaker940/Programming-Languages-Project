@@ -6,17 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->date('birthDate');
+            $table->string('number')->unique();
             $table->string('password');
+            $table->string('profile_photo_path');
+            $table->string('id_photo_path_front');
+            $table->string('id_photo_path_back');
+            $table->enum('status', ['pending', 'rejected', 'frozen', 'active'])->default('pending');
+            $table->enum('type', ['tenant', 'owner', 'admin']);
             $table->rememberToken();
             $table->timestamps();
         });
@@ -37,9 +40,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
