@@ -26,4 +26,18 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function apartments()
+    {
+        return $this->hasMany(Apartment::class);
+    }
+
+    // protected static function booted()
+    // {
+    // static::deleting(function ($user) {
+    //     $user->apartments()->each(function ($apartment) {
+    //         $apartment->delete();
+    //     });
+    // });
+    // }
 }

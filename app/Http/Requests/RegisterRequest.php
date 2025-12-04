@@ -31,7 +31,7 @@ class RegisterRequest extends FormRequest
                 'regex:/^(?:\+9639|09|009639)\d{8}$/'
             ],
             'status' => 'string|sometimes|in:pending,active,rejected,frozen',
-            'type' => 'sometimes|in:tenant,owner,admin',
+            'type' => 'required|in:tenant,owner,admin',
             'id_photo_back' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic',
             'id_photo_front' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic',
             'profile_photo' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic'
