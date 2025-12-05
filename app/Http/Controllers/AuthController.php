@@ -20,6 +20,7 @@ class AuthController extends Controller
             'birthdate' => $request->birthdate,
             'number' => $request->number,
             'password' => Hash::make($request->password),
+            'type' => $request->type,
             'profile_photo' => "hi",
             "id_photo_front" => "haboooooooooooooooush",
             "id_photo_back" => "Medannnnnnnnnnnnnnnnnnnnnnnnni"
