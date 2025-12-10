@@ -5,18 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ApartmentRequest;
 use App\Models\Apartment;
 use App\Models\ApartmentImages;
+
 use Illuminate\Http\Request;
 
 class ApartmentController extends Controller
 {
     public function store(ApartmentRequest $request)
     {
-
+        $this->authorize('create', Apartment::class);
         $user = auth()->user();
 
         $apartment = Apartment::create(array_merge(
             $request->except('images'),
-            ['user_id' => $user->id]
+            ['owner_id' => $user->id]
         ));
 
         if($request->hasFile('images'))
@@ -25,7 +26,7 @@ class ApartmentController extends Controller
 
                 foreach($request->file('images') as $image)
                     {
-                        $filename = time() . '_' . $image->getClientOriginalName();
+                        $filename = time().'_'.$image->getClientOriginalName();
                         $path = $image->storeAs($folder, $filename, 'public');
 
                         ApartmentImages::create([
