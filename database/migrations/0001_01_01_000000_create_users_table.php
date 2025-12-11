@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('id_photo_front');
             $table->string('id_photo_back');
             $table->enum('status', ['pending', 'rejected', 'frozen', 'active'])->default('pending');
-            $table->enum('type', ['tenant', 'owner', 'admin']);
+            $table->enum('type', ['tenant', 'owner', 'admin'])->default('tenant');
             $table->rememberToken();
             $table->timestamps();
         });
