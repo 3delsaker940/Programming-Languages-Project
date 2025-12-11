@@ -34,7 +34,8 @@ class RegisterRequest extends FormRequest
             'type' => 'required|in:tenant,owner,admin',
             'id_photo_back' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic',
             'id_photo_front' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic',
-            'profile_photo' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic'
+            'profile_photo' => 'required|image|max:16384|mimes:jpg,jpeg,png,heic',
+            'password' => 'required|string|min:8|confirmed'
         ];
     }
 }
