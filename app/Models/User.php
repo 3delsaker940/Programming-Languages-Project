@@ -29,7 +29,24 @@ class User extends Authenticatable
 
     public function apartments()
     {
-        return $this->hasMany(Apartment::class);
+        return $this->hasMany(Apartment::class, 'owner_id', 'id');
     }
+
+    //==============for delete user + his file ==============
+    // protected static function boot()
+    //     {
+    //             parent::boot();
+
+    //             static::deleting(function ($user) {
+
+    //             $folder = "apartments/{$user->id}";
+
+    //             if (\Storage::disk('public')->exists($folder)) {
+    //                 \Storage::disk('public')->deleteDirectory($folder);
+    //             }
+
+    //         });
+    //     }
+    //========================================================
 
 }

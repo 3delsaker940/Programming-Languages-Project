@@ -16,10 +16,14 @@ Route::post('apartments/create',[ApartmentController::class, 'createApartments']
 Route::delete('apartments/destroy/{apartment}',[ApartmentController::class, 'destroyApartments'])->middleware('auth:sanctum');
 Route::post('apartments/update/{apartment}',[ApartmentController::class, 'updateApartments'])->middleware('auth:sanctum');
 
-// Route::get('apartments/allApartments',[ApartmentController::class, 'showAllApartments'])->middleware('auth:sanctum');
+Route::get('apartments/allApartments',[ApartmentController::class, 'showAllApartments'])->middleware('auth:sanctum');
 Route::get('apartments/idApartments/{apartment}',[ApartmentController::class, 'showIdApartment'])->middleware('auth:sanctum');
-Route::get('apartments/userApartments',[ApartmentController::class, 'userApartments'])->middleware('auth:sanctum');
+Route::get('apartments/user/{userId}', [ApartmentController::class, 'usersApartments'])->middleware('auth:sanctum');
+Route::get('apartments/myApartments',[ApartmentController::class, 'myApartments'])->middleware('auth:sanctum');
 
+//=====for test to delete user + his files =======================
+// Route::delete('user/delete/{user}',[ApartmentController::class, 'deleteUser'])->middleware('auth:sanctum');
+//=================================================
 
 
 
