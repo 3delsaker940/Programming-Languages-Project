@@ -3,17 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ApartmentRequest;
+use App\Http\Requests\UpdateApartmentRequest;
+use App\Http\Resources\ApartmentResource;
+
 use App\Http\Requests\FilterRequest;
+
 use App\Models\Apartment;
 use App\Http\Requests\UpdateApartmentRequest;
 use App\Models\ApartmentImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+// use App\Http\Controllers\Controller;
+use App\Models\User;
 
 
 class ApartmentController extends Controller
 {
+    use AuthorizesRequests;
     public function createApartments(ApartmentRequest $request)
     {
 
@@ -58,12 +66,7 @@ class ApartmentController extends Controller
     public function destroyApartments(Request $request, Apartment $apartment)
     {
         $user = $request->user();
-        if($apartment->user_id !== $user->id)
-            {
-                return response()->json([
-                    'message' => 'Unauthorized'
-                ], 403);
-            }
+        $this->authorize('destroy', $apartment);
 
         $path = "apartments/{$user->id}/{$apartment->id}";
         
@@ -83,11 +86,7 @@ class ApartmentController extends Controller
     {
         $user = $request->user();
 
-        if ($apartment->user_id !== $user->id) {
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 403);
-        }
+        $this->authorize('update', $apartment);
 
         $folder = "apartments/{$user->id}/{$apartment->id}";
 
@@ -120,10 +119,7 @@ class ApartmentController extends Controller
 
         $apartment->update($request->validated());
 
-        return response()->json([
-            'message' => 'Apartment Updated Successfully',
-            'apartment' => $apartment->load('images'),
-        ], 200);
+        return new ApartmentResource($apartment->load('images'));
     }
           
     public function filtering(FilterRequest $request)
@@ -151,42 +147,63 @@ class ApartmentController extends Controller
         return response()->json($apartments, 200);
     }
 
-    // public function showAllApartments()
-    // {
-    //     $apartments = Apartment::select('id', 'user_id', 'title','description','price', 'city', 'area', 'rooms', 'bathrooms')
-    //     ->with(['images:id,apartment_id,apartment_image_path'])
-    //     ->latest()
-    //     ->paginate(10);
+    //---- IN ALL THIS FUNCTIONS YOU SHOULD BE ACCEPTED IN THE APP (have token) -------
 
-    //     return response()->json([
-    //         'success' => true,
-    //         'apartments' => $apartments
-    //     ]);
-    // }
-
-    public function showIdApartment(Apartment $apartment)
+    //======== show all apartments in the app (to all users) ============= 
+    public function showAllApartments()
     {
-        $apartment->load(['images','user']);
+        $apartments = Apartment::with(['images:id,apartment_id,apartment_image_path'])
+        ->latest()
+        ->paginate(8);
 
-        return response()->json([
-            'success' => true,
-            'apartment' => $apartment
-        ]);
+        return ApartmentResource::collection($apartments);
     }
 
-    public function userApartments(Request $request)
+    //==========show apartment from the id + need to be your apartment ============
+    public function showIdApartment(Apartment $apartment)
+    {
+
+        $this->authorize('showId', $apartment);
+
+        return new ApartmentResource($apartment->load('images'));
+    }
+
+    //=========show the apartments to any user from his id + dont need to be your apartments =======
+    public function usersApartments($userId)
+        {
+            $targetUser = User::findOrFail($userId);
+
+            $apartments = $targetUser->apartments()
+                ->with('images:id,apartment_id,apartment_image_path')
+                ->latest()
+                ->paginate(8); 
+
+            return ApartmentResource::collection($apartments);
+        }
+
+    //show all apartments to the user only
+    public function myApartments(Request $request)
     {
         $user = $request->user();
 
-        $apartments = Apartment::select('id', 'user_id', 'title','description','price', 'city', 'area', 'rooms', 'bathrooms')
-        ->where('user_id', $user->id)
+        $apartments = $user->apartments()
         ->with(['images:id,apartment_id,apartment_image_path'])
         ->latest()
-        ->paginate(10);
+        ->paginate(8);
 
-        return response()->json([
-            'success' => true,
-            'apartments' => $apartments
-        ]);
+        return ApartmentResource::collection($apartments);
     }
+
+    //=====for test to delete user + his files =======================
+    // public function deleteUser(User $user)
+    // {
+        
+    //     $user->delete();
+
+    //     return response()->json([
+    //         'message'=> 'User deleted'
+    //     ]);
+    // }
+    //==========================================================
+
 }
