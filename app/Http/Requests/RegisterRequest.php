@@ -20,8 +20,8 @@ class RegisterRequest extends FormRequest
             'birthdate' => [
                 'required',
                 'date',
-                'before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
-                'after_or_equal:' . now()->subYears(100)->format('Y-m-d'),
+                'before_or_equal:' . now()->subYears(18)->format('Y/m/d'),
+                'after_or_equal:' . now()->subYears(100)->format('Y/m/d'),
             ],
 
             'number' => [
