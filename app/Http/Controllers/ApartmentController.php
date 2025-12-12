@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ApartmentRequest;
 use App\Http\Requests\UpdateApartmentRequest;
 use App\Http\Resources\ApartmentResource;
+
+use App\Http\Requests\FilterRequest;
+
 use App\Models\Apartment;
+use App\Http\Requests\UpdateApartmentRequest;
 use App\Models\ApartmentImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,9 +25,9 @@ class ApartmentController extends Controller
     public function createApartments(ApartmentRequest $request)
     {
 
-        $this->authorize('create', Apartment::class);
-        $user = auth()->user();
 
+        $this->authorize('create', Apartment::class);
+        $user = Auth::user();
         $apartment = Apartment::create(array_merge(
             $request->except('images'),
             ['owner_id' => $user->id]
@@ -57,6 +61,7 @@ class ApartmentController extends Controller
 
         return response()->json($apartmentWithImages, 200);
     }
+
 
     public function destroyApartments(Request $request, Apartment $apartment)
     {
@@ -115,6 +120,31 @@ class ApartmentController extends Controller
         $apartment->update($request->validated());
 
         return new ApartmentResource($apartment->load('images'));
+    }
+          
+    public function filtering(FilterRequest $request)
+    {
+        $min_price = $request->min_price ?? 0;
+        $max_price = $request->max_price ?? 1000000;
+        $min_rooms = $request->min_rooms ?? 0;
+        $max_rooms = $request->max_rooms ?? 20;
+        $min_bathrooms = $request->min_bathrooms ?? 0;
+        $max_bathrooms = $request->max_bathrooms ?? 20;
+        $min_area = $request->min_area ?? 0;
+        $max_area = $request->max_area ?? 6000;
+        $city = $request->city ?? null;
+
+        $query = Apartment::query();
+        if ($city !== null) {
+            $query->where('city', $city);
+        }
+        $query->whereBetween('price', [$min_price, $max_price]);
+        $query->whereBetween('rooms', [$min_rooms, $max_rooms]);
+        $query->whereBetween('bathrooms', [$min_bathrooms, $max_bathrooms]);
+        $query->whereBetween('area', [$min_area, $max_area]);
+
+        $apartments = $query->paginate(8);
+        return response()->json($apartments, 200);
     }
 
     //---- IN ALL THIS FUNCTIONS YOU SHOULD BE ACCEPTED IN THE APP (have token) -------
