@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ApartmentRequest;
-use App\Http\Requests\UpdateApartmentRequest;
 use App\Http\Resources\ApartmentResource;
 
 use App\Http\Requests\FilterRequest;
@@ -33,15 +32,13 @@ class ApartmentController extends Controller
             ['owner_id' => $user->id]
         ));
 
-        if($request->hasFile('images'))
-            {
-                
-                $folder = "apartments/{$user->id}/{$apartment->id}";
+        if ($request->hasFile('images')) {
 
-                foreach($request->file('images') as $image)
-                    {
-                        $filename = time().'_'.$image->getClientOriginalName();
-                        $path = $image->storeAs($folder, $filename, 'public');
+            $folder = "apartments/{$user->id}/{$apartment->id}";
+
+            foreach ($request->file('images') as $image) {
+                $filename = time() . '_' . $image->getClientOriginalName();
+                $path = $image->storeAs($folder, $filename, 'public');
 
                 ApartmentImages::create([
                     'apartment_id' => $apartment->id,
@@ -69,12 +66,11 @@ class ApartmentController extends Controller
         $this->authorize('destroy', $apartment);
 
         $path = "apartments/{$user->id}/{$apartment->id}";
-        
-        if(Storage::disk('public')->exists($path))
-        {
+
+        if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->deleteDirectory($path);
         }
-        
+
         $apartment->delete();
 
         return response()->json([
@@ -121,7 +117,7 @@ class ApartmentController extends Controller
 
         return new ApartmentResource($apartment->load('images'));
     }
-          
+
     public function filtering(FilterRequest $request)
     {
         $min_price = $request->min_price ?? 0;
@@ -149,12 +145,12 @@ class ApartmentController extends Controller
 
     //---- IN ALL THIS FUNCTIONS YOU SHOULD BE ACCEPTED IN THE APP (have token) -------
 
-    //======== show all apartments in the app (to all users) ============= 
+    //======== show all apartments in the app (to all users) =============
     public function showAllApartments()
     {
         $apartments = Apartment::with(['images:id,apartment_id,apartment_image_path'])
-        ->latest()
-        ->paginate(8);
+            ->latest()
+            ->paginate(8);
 
         return ApartmentResource::collection($apartments);
     }
@@ -170,16 +166,16 @@ class ApartmentController extends Controller
 
     //=========show the apartments to any user from his id + dont need to be your apartments =======
     public function usersApartments($userId)
-        {
-            $targetUser = User::findOrFail($userId);
+    {
+        $targetUser = User::findOrFail($userId);
 
-            $apartments = $targetUser->apartments()
-                ->with('images:id,apartment_id,apartment_image_path')
-                ->latest()
-                ->paginate(8); 
+        $apartments = $targetUser->apartments()
+            ->with('images:id,apartment_id,apartment_image_path')
+            ->latest()
+            ->paginate(8);
 
-            return ApartmentResource::collection($apartments);
-        }
+        return ApartmentResource::collection($apartments);
+    }
 
     //show all apartments to the user only
     public function myApartments(Request $request)
@@ -187,9 +183,9 @@ class ApartmentController extends Controller
         $user = $request->user();
 
         $apartments = $user->apartments()
-        ->with(['images:id,apartment_id,apartment_image_path'])
-        ->latest()
-        ->paginate(8);
+            ->with(['images:id,apartment_id,apartment_image_path'])
+            ->latest()
+            ->paginate(8);
 
         return ApartmentResource::collection($apartments);
     }
@@ -197,7 +193,7 @@ class ApartmentController extends Controller
     //=====for test to delete user + his files =======================
     // public function deleteUser(User $user)
     // {
-        
+
     //     $user->delete();
 
     //     return response()->json([
