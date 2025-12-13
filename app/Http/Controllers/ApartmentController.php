@@ -14,8 +14,9 @@ use App\Models\ApartmentImages;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-// use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller;
 use App\Models\User;
 
 class ApartmentController extends Controller
