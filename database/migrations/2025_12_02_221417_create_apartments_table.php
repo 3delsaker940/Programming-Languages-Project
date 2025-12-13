@@ -14,12 +14,12 @@ return new class extends Migration
             $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->integer('rooms');
-            $table->integer('bathrooms');
-            $table->integer('area');
-            $table->decimal('price',10,2);
-            $table->string('city');
-            $table->enum('status',['available','rented'])->default('available');
+            $table->integer('rooms')->index();
+            $table->integer('bathrooms')->index();
+            $table->integer('area')->index();
+            $table->decimal('price', 10, 2)->index();
+            $table->string('city')->index();
+            $table->enum('status', ['available', 'rented'])->default('available');
             $table->timestamps();
         });
     }

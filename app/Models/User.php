@@ -23,17 +23,35 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'birthdate' => 'date:Y/m/d',
             'password' => 'hashed',
         ];
     }
 
     public function apartments()
     {
-        return $this->hasMany(Apartment::class);
+        return $this->hasMany(Apartment::class, 'owner_id', 'id');
     }
     public function Reservation()
     {
         return $this->hasMany(Reservations::class);
     }
+
+    //==============for delete user + his file ==============
+    // protected static function boot()
+    //     {
+    //             parent::boot();
+
+    //             static::deleting(function ($user) {
+
+    //             $folder = "apartments/{$user->id}";
+
+    //             if (\Storage::disk('public')->exists($folder)) {
+    //                 \Storage::disk('public')->deleteDirectory($folder);
+    //             }
+
+    //         });
+    //     }
+    //========================================================
 
 }
