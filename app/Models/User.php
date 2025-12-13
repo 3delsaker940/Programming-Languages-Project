@@ -32,6 +32,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Apartment::class, 'owner_id', 'id');
     }
+    public function Reservation()
+    {
+        return $this->hasMany(Reservations::class);
+    }
 
     //==============for delete user + his file ==============
     // protected static function boot()

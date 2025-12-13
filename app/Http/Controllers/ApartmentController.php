@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ApartmentRequest;
+
 use App\Http\Resources\ApartmentResource;
 
 use App\Http\Requests\FilterRequest;
@@ -10,20 +11,19 @@ use App\Http\Requests\FilterRequest;
 use App\Models\Apartment;
 use App\Http\Requests\UpdateApartmentRequest;
 use App\Models\ApartmentImages;
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 // use App\Http\Controllers\Controller;
 use App\Models\User;
 
-
 class ApartmentController extends Controller
 {
+
     use AuthorizesRequests;
     public function createApartments(ApartmentRequest $request)
     {
-
 
         $this->authorize('create', Apartment::class);
         $user = Auth::user();
@@ -32,29 +32,29 @@ class ApartmentController extends Controller
             ['owner_id' => $user->id]
         ));
 
+
         if ($request->hasFile('images')) {
-
             $folder = "apartments/{$user->id}/{$apartment->id}";
-
             foreach ($request->file('images') as $image) {
                 $filename = time() . '_' . $image->getClientOriginalName();
                 $path = $image->storeAs($folder, $filename, 'public');
 
-                ApartmentImages::create([
-                    'apartment_id' => $apartment->id,
-                    'apartment_image_path' => $path
-                ]);
+                        ApartmentImages::create([
+                            'apartment_id' => $apartment->id,
+                            'apartment_image_path' => $path
+                        ]);
+                    }
             }
-        }
 
         //================================================
         $apartmentWithImages = $apartment->load('images')->toArray();
-        $apartmentWithImages['images'] = collect($apartmentWithImages['images'])->map(function ($img) {
+        $apartmentWithImages['images'] = collect($apartmentWithImages['images'])->map(function ($img){
             return [
                 'id' => $img['id'],
                 'url' => asset('storage/' . $img['apartment_image_path'])
             ];
         });
+
 
         return response()->json($apartmentWithImages, 200);
     }
