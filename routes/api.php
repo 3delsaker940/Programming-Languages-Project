@@ -5,26 +5,41 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+//==================================== Auth ====================================================
+
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
-Route::get('filtering', [ApartmentController::class, 'filtering']);
-Route::post('apartments/create',[ApartmentController::class, 'createApartments'])->middleware('auth:sanctum');
-Route::delete('apartments/destroy/{apartment}',[ApartmentController::class, 'destroyApartments'])->middleware('auth:sanctum');
-Route::post('apartments/update/{apartment}',[ApartmentController::class, 'updateApartments'])->middleware('auth:sanctum');
 
-Route::get('apartments/allApartments',[ApartmentController::class, 'showAllApartments'])->middleware('auth:sanctum');
-Route::get('apartments/idApartments/{apartment}',[ApartmentController::class, 'showIdApartment'])->middleware('auth:sanctum');
-Route::get('apartments/user/{userId}', [ApartmentController::class, 'usersApartments'])->middleware('auth:sanctum');
-Route::get('apartments/myApartments',[ApartmentController::class, 'myApartments'])->middleware('auth:sanctum');
+//======================================== API's needs middleware (active + auth:sanctum) ======
 
-//=====for test to delete user + his files =======================
-// Route::delete('user/delete/{user}',[ApartmentController::class, 'deleteUser'])->middleware('auth:sanctum');
-//=================================================
+Route::middleware(['auth:sanctum', 'active'])->group(function() {
+
+    Route::get('/me', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::get('filtering', [ApartmentController::class, 'filtering']);
+    Route::post('apartments/create',[ApartmentController::class, 'createApartments']);
+    Route::delete('apartments/destroy/{apartment}',[ApartmentController::class, 'destroyApartments']);
+    Route::post('apartments/update/{apartment}',[ApartmentController::class, 'updateApartments']);
+
+    Route::get('apartments/allApartments',[ApartmentController::class, 'showAllApartments']);
+    Route::get('apartments/idApartments/{apartment}',[ApartmentController::class, 'showIdApartment']);
+    Route::get('apartments/user/{userId}', [ApartmentController::class, 'usersApartments']);
+    Route::get('apartments/myApartments',[ApartmentController::class, 'myApartments']);
+
+});
+
+//=============================================== Admin ======================================
+
+
+
+    //=====for test to delete user + his files =======================
+    // Route::delete('user/delete/{user}',[ApartmentController::class, 'deleteUser'])->middleware('auth:sanctum');
+    //=================================================
+//===========================================================================
 
 
