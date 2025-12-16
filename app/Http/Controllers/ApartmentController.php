@@ -40,16 +40,16 @@ class ApartmentController extends Controller
                 $filename = time() . '_' . $image->getClientOriginalName();
                 $path = $image->storeAs($folder, $filename, 'public');
 
-                        ApartmentImages::create([
-                            'apartment_id' => $apartment->id,
-                            'apartment_image_path' => $path
-                        ]);
-                    }
+                ApartmentImages::create([
+                    'apartment_id' => $apartment->id,
+                    'apartment_image_path' => $path
+                ]);
             }
+        }
 
         //================================================
         $apartmentWithImages = $apartment->load('images')->toArray();
-        $apartmentWithImages['images'] = collect($apartmentWithImages['images'])->map(function ($img){
+        $apartmentWithImages['images'] = collect($apartmentWithImages['images'])->map(function ($img) {
             return [
                 'id' => $img['id'],
                 'url' => asset('storage/' . $img['apartment_image_path'])
