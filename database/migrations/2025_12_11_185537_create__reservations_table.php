@@ -14,8 +14,8 @@ return new class extends Migration
             $table->date('end_date');
             $table->foreignID('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignID('apartment_id')->constrained('apartments')->cascadeOnDelete();
-            $table->enum('status', ['pending','confirmed','cancelled'])->default('confirmed');
-            $table->index(['apartment_id', 'start_at', 'end_at']);
+            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('confirmed');
+            $table->index(['apartment_id', 'start_date', 'end_date']);
             $table->timestamps();
         });
     }
