@@ -31,11 +31,12 @@ class AuthController extends Controller
         $filename = $user->id;
         $back = $filename . "back";
         $front = $filename . "front";
-        $folder = 'private/Profile_photos';
-        $folder1 = 'private/ID_photos';
+        $folder = 'profile-photos';
+        $folder1 = 'ID_photos';
         $path1 = $IDFront->storeAs($folder1, $front);
         $path2 = $IDBack->storeAs($folder1, $back);
-        $path = $profileImage->storeAs($folder, $filename);
+        $profileName = $filename . '.' . $profileImage->getClientOriginalExtension();
+        $path = $profileImage->storeAs($folder, $profileName, 'public');
         $user->profile_photo = $path;
         $user->id_photo_back = $path2;
         $user->id_photo_front = $path1;
