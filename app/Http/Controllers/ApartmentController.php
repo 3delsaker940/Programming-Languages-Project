@@ -141,7 +141,7 @@ class ApartmentController extends Controller
         $query->whereBetween('area', [$min_area, $max_area]);
 
         $apartments = $query->paginate(8);
-        return response()->json($apartments, 200);
+        return ApartmentResource::collection($apartments);
     }
 
     //---- IN ALL THIS FUNCTIONS YOU SHOULD BE ACCEPTED IN THE APP (have token) -------
