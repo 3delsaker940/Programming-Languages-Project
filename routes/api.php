@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReservationsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me', function (Request $request) {
         return $request->user();
     });
+
 
 
 
@@ -43,9 +45,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/filtering', [ApartmentController::class, 'filtering']);
         Route::get('/allApartments', [ApartmentController::class, 'showAllApartments']);
     });
+    Route::post('reservations', [ReservationsController::class, 'StoreReservatins']);
+    Route::get('my-reservations', [ReservationsController::class, 'myReservations']);
+    Route::put('reservations/{reservation}', [ReservationsController::class, 'UpdateReservation']);
+    Route::post('reservations/{reservation}/cancel', [ReservationsController::class, 'CancelReservation']);
+
+
 });
 
-//=============================================== Admin ======================================
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('user/verfied/{id}', [UserController::class, 'ChangeUserStatusToActive']);
     Route::get('user/id-photo/front/{id}', [UserController::class, 'idPhotoFront']);
@@ -53,5 +60,3 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 });
     //=====for test to delete user + his files =======================
     // Route::delete('user/delete/{user}',[ApartmentController::class, 'deleteUser'])->middleware('auth:sanctum');
-    //=================================================
-//===========================================================================
