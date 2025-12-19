@@ -4,12 +4,7 @@ namespace App\Providers;
 
 use App\Models\Apartment;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use App\Models\Property;
-use App\Policies\PropertyPolicy;
-use App\Models\User;
 use App\Policies\ApartmentPolicy;
-use App\Policies\UserPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
