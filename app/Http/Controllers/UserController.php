@@ -9,6 +9,24 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    public function ToggleFavorite($apartmentId)
+    {
+        Apartment::findOrFail($apartmentId);
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        $isFavorite = $user->favoritesApartment()->where('apartment_id', $apartmentId)->exists();
+        if ($isFavorite) {
+            $user->favoritesApartment()->detach([$apartmentId]);
+            return response()->json([
+                'message' => 'Isn\'t favorite'
+            ], 200);
+        } else {
+            $user->favoritesApartment()->syncWithoutDetaching([$apartmentId]);
+            return response()->json([
+                'message' => 'Is favourite'
+            ], 200);
+        }
+    }
     public function addToFavorites($apartmentId)
     {
         Apartment::findOrFail($apartmentId);
@@ -38,6 +56,7 @@ class UserController extends Controller
     }
     public function checkIfFavorite($apartmentId)
     {
+        Apartment::findOrFail($apartmentId);
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         $isFavorite = $user->favoritesApartment()->where('apartment_id', $apartmentId)->exists();
