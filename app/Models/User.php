@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
 
     protected $guarded = [];
 
@@ -35,6 +35,10 @@ class User extends Authenticatable
     public function Reservation()
     {
         return $this->hasMany(Reservations::class);
+    }
+    public function favoritesApartment()
+    {
+        return $this->belongsToMany(Apartment::class, 'favorites');
     }
 
     //==============for delete user + his file ==============

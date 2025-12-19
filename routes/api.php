@@ -21,7 +21,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me', function (Request $request) {
         return $request->user();
     });
-
+    Route::prefix('favorites')->group(function () {
+        Route::post('/add/{apartmentId}', [UserController::class, 'addToFavorites']);
+        Route::delete('/remove/{apartmentId}', [UserController::class, 'removeFromFavorites']);
+        Route::get('/get', [UserController::class, 'getFavorites']);
+        Route::get('/check/{apartmentId}', [UserController::class, 'checkIfFavorite']);
+    });
 
 
     Route::prefix('apartments')->group(function () {
