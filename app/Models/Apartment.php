@@ -7,11 +7,11 @@ use Storage;
 
 class Apartment extends Model
 {
-    protected $fillable = ['title','description','rooms','bathrooms','area','price','city','status','owner_id'];
+    protected $fillable = ['title', 'description', 'rooms', 'bathrooms', 'area', 'price', 'city', 'status', 'owner_id'];
 
     public function user()
     {
-        return $this->belongsTo(User::class,'owner_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function images()
@@ -23,4 +23,8 @@ class Apartment extends Model
         return $this->hasMany(Reservations::class);
     }
 
+    public function favorites()
+    {
+        return $this->belongsToMany(User::class, 'favorites');
+    }
 }
