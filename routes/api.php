@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReservationsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,7 +58,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('reservations/{reservation}', [ReservationsController::class, 'updateReservation']);
     Route::post('reservations/{reservation}/cancel', [ReservationsController::class, 'cancelReservation']);
     Route::post('reservations/{reservation}/approve', [ReservationsController::class, 'approveReservation']);
-
 });
 
 //=============================================== Admin ======================================
