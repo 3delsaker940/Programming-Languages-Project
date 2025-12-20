@@ -42,14 +42,22 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
 });
 
-
 Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('user/profile-photo', [UserController::class, 'profilePhoto']);
+
     Route::prefix('apartments')->group(function () {
         Route::get('/filtering', [ApartmentController::class, 'filtering']);
         Route::get('/allApartments', [ApartmentController::class, 'showAllApartments']);
     });
+
+    // ===============================Reservations===================================================
+    Route::post('reservations', [ReservationsController::class, 'storeReservations']);
+    Route::get('my-reservations', [ReservationsController::class, 'myReservations']);
+    Route::put('reservations/{reservation}', [ReservationsController::class, 'updateReservation']);
+    Route::post('reservations/{reservation}/cancel', [ReservationsController::class, 'cancelReservation']);
+    Route::post('reservations/{reservation}/approve', [ReservationsController::class, 'approveReservation']);
+
 });
 
 //=============================================== Admin ======================================
