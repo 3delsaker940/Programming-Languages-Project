@@ -10,7 +10,7 @@ class ApartmentPolicy
 {
     public function create(User $user): bool
     {
-        return in_array($user->type,['owner','admin']);
+        return in_array($user->type, ['owner', 'admin']);
     }
     public function destroy(User $user, Apartment $apartment): bool
     {
