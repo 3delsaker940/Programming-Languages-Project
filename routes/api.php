@@ -37,22 +37,23 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
 });
 
-
 Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('user/profile-photo', [UserController::class, 'profilePhoto']);
+
     Route::prefix('apartments')->group(function () {
         Route::get('/filtering', [ApartmentController::class, 'filtering']);
         Route::get('/allApartments', [ApartmentController::class, 'showAllApartments']);
     });
-    Route::post('reservations', [ReservationsController::class, 'StoreReservatins']);
-    Route::get('my-reservations', [ReservationsController::class, 'myReservations']);
-    Route::put('reservations/{reservation}', [ReservationsController::class, 'UpdateReservation']);
-    Route::post('reservations/{reservation}/cancel', [ReservationsController::class, 'CancelReservation']);
 
+    // ===============================Reservations===================================================
+    Route::post('reservations', [ReservationsController::class, 'storeReservations']);
+    Route::get('my-reservations', [ReservationsController::class, 'myReservations']);
+    Route::put('reservations/{reservation}', [ReservationsController::class, 'updateReservation']);
+    Route::post('reservations/{reservation}/cancel', [ReservationsController::class, 'cancelReservation']);
+    Route::post('reservations/{reservation}/approve', [ReservationsController::class, 'approveReservation']);
 
 });
-
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('user/verfied/{id}', [UserController::class, 'ChangeUserStatusToActive']);
     Route::get('user/id-photo/front/{id}', [UserController::class, 'idPhotoFront']);
