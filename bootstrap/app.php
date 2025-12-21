@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckUserStatus;
-use App\Http\Middleware\EnsureOnwer;
+use App\Http\Middleware\EnsureOwner;
 use App\Http\Middleware\EnsureTenants;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Foundation\Application;
@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => CheckUserStatus::class,
             'admin' => EnsureUserIsAdmin::class,
             'tenant' => EnsureTenants::class,
-            'owner'  => EnsureOnwer::class,
+            'owner'  => EnsureOwner::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

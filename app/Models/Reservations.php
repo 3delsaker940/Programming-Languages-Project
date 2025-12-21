@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class Reservations extends Model
 {
-    protected $fillable = ['user_id','apartment_id','start_date','end_date','status'];
+    protected $fillable = ['user_id', 'apartment_id', 'start_date', 'end_date', 'status'];
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
@@ -24,29 +24,29 @@ class Reservations extends Model
     public function scopeOverlapping(Builder $query, $apartmentId, $startAt, $endAt)
     {
         return $query->where('apartment_id', $apartmentId)
-                     ->whereIn('status', ['pending','confirmed'])
-                     ->where(function($sub) use ($startAt, $endAt) {
-                         $sub->where('start_date', '<', $endAt)
-                             ->where('end_date', '>', $startAt);
-                     });
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where(function ($sub) use ($startAt, $endAt) {
+                $sub->where('start_date', '<', $endAt)
+                    ->where('end_date', '>', $startAt);
+            });
     }
 
     public function scopeOverlappingExceptReservation(Builder $query, $apartmentId, $startAt, $endAt, $reservationId)
     {
         return $query->where('apartment_id', $apartmentId)
-                     ->whereIn('status', ['pending','confirmed'])
-                     ->where('id', '!=', $reservationId)
-                     ->where(function ($sub) use ($startAt, $endAt) {
-                         $sub->where('start_date', '<', $endAt)
-                             ->where('end_date', '>', $startAt);
-                     });
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('id', '!=', $reservationId)
+            ->where(function ($sub) use ($startAt, $endAt) {
+                $sub->where('start_date', '<', $endAt)
+                    ->where('end_date', '>', $startAt);
+            });
     }
     public function isCancelled()
     {
         return $this->status === 'cancelled';
     }
 
-    public function isPast()
+    public function isfinished()
     {
         return $this->status === 'confirmed' && $this->end_date < now();
     }
@@ -57,12 +57,12 @@ class Reservations extends Model
     public function isOverlapping($startAt, $endAt)
     {
         return self::where('apartment_id', $this->apartment_id)
-                   ->whereIn('status', ['pending','confirmed'])
-                   ->where('id', '!=', $this->id ?? 0)
-                   ->where(function($q) use ($startAt, $endAt){
-                       $q->where('start_date', '<', $endAt)
-                         ->where('end_date', '>', $startAt);
-                   })->exists();
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('id', '!=', $this->id ?? 0)
+            ->where(function ($q) use ($startAt, $endAt) {
+                $q->where('start_date', '<', $endAt)
+                    ->where('end_date', '>', $startAt);
+            })->exists();
     }
 
     public function cancellationDeadline()
@@ -71,15 +71,14 @@ class Reservations extends Model
     }
     public function scopeStatus(Builder $query, $status)
     {
-        switch ($status)
-        {
+        switch ($status) {
             case 'pending':
                 $query->where('status', 'pending')->orderBy('start_date', 'asc');
                 break;
             case 'confirmed':
                 $query->where('status', 'confirmed')->where('end_date', '>=', now())->orderBy('start_date', 'asc');
                 break;
-            case 'past':
+            case 'finished':
                 $query->where('status', 'confirmed')->where('end_date', '<', now())->orderBy('start_date', 'desc');
                 break;
             case 'cancelled':

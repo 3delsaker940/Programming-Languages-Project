@@ -19,7 +19,7 @@ class ReservationsController extends Controller
         $endDate = new Carbon($data['end_date']);
         $apartmentId = $data['apartment_id'];
         $userId = $request->user()->id;
-        return DB::transaction(function() use ($startDate, $endDate, $apartmentId, $userId) {
+        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId) {
             $apartment = Apartment::where('id', $apartmentId)->lockForUpdate()->first();
             if (!$apartment) {
                 return response()->json(['message' => 'Apartment not found'], 404);
@@ -44,17 +44,14 @@ class ReservationsController extends Controller
     public function updateReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('update', $reservation);
-        if($reservation->isCancelled())
-        {
-            return response()->json(['message'=>'the Reservation is canceled'], 400);
+        if ($reservation->isCancelled()) {
+            return response()->json(['message' => 'the Reservation is canceled'], 400);
         }
-        if($reservation->isPast())
-        {
-            return response()->json(['message'=>'An expired reservation cannot be modified'], 400);
+        if ($reservation->isFinished()) {
+            return response()->json(['message' => 'An expired reservation cannot be modified'], 400);
         }
-        if($reservation->isCurrent())
-        {
-            return response()->json(['message'=>'No , it is possible to modify a reservation that started'], 400);
+        if ($reservation->isCurrent()) {
+            return response()->json(['message' => 'No , it is possible to modify a reservation that started'], 400);
         }
         $request->validate([
             'start_date' => 'required|date|after_or_equal:today',
@@ -78,13 +75,11 @@ class ReservationsController extends Controller
     public function cancelReservation(Reservations $reservation)
     {
         $this->authorize('cancel', $reservation);
-        if($reservation->isCancelled())
-        {
-            return response()->json(['message'=>'Reservation is already cancelled'], 200);
+        if ($reservation->isCancelled()) {
+            return response()->json(['message' => 'Reservation is already cancelled'], 200);
         }
-        if(now() > $reservation->cancellationDeadline())
-        {
-            return response()->json(['message'=>'the limited cancellation period has expired'], 400);
+        if (now() > $reservation->cancellationDeadline()) {
+            return response()->json(['message' => 'the limited cancellation period has expired'], 400);
         }
         $reservation->update(['status' => 'cancelled']);
         return response()->json([
@@ -101,16 +96,14 @@ class ReservationsController extends Controller
         if ($statusFilter) {
             $query = Reservations::forUser($userId);
 
-            if ($statusFilter === 'past') {
-                $data = $query->status('past')->get()
-                             ->map(function ($reservation) {
+            if ($statusFilter === 'finished') {
+                $data = $query->status('finished')->get()
+                    ->map(function ($reservation) {
 
-                                 $reservation->display_status = 'past';
-                                 return $reservation;
-                             });
-            }
-            else
-            {
+                        $reservation->display_status = 'finished';
+                        return $reservation;
+                    });
+            } else {
                 $data = $query->status($statusFilter)->get();
             }
 
@@ -121,38 +114,37 @@ class ReservationsController extends Controller
         }
         return response()->json([
             'pending' => Reservations::forUser($userId)
-            ->status('pending')
-            ->get(),
+                ->status('pending')
+                ->get(),
 
             'confirmed' => Reservations::forUser($userId)
-            ->status('confirmed')
-            ->get(),
+                ->status('confirmed')
+                ->get(),
 
-            'past' => Reservations::forUser($userId)
-            ->status('past')
-            ->get()
-            ->map(function ($reservation) {
-                $reservation->display_status = 'past';
-                return $reservation;
-            }),
+            'finished' => Reservations::forUser($userId)
+                ->status('finished')
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->display_status = 'finished';
+                    return $reservation;
+                }),
 
             'cancelled' => Reservations::forUser($userId)
-            ->status('cancelled')
-            ->get(),
+                ->status('cancelled')
+                ->get(),
 
             'rejected' => Reservations::forUser($userId)
-            ->status('rejected')
-            ->get(),
+                ->status('rejected')
+                ->get(),
         ], 200);
     }
     //===========================================all reservaions in app=================================
     public function allReservations(Request $request)
     {
         $reservations = Reservations::orderBy('start_date', 'asc')->get()->map(function ($res) {
-            if ($res->status === 'confirmed' && $res->end_date < now())
-                {
-                    $res->status = 'past';
-                }
+            if ($res->status === 'confirmed' && $res->end_date < now()) {
+                $res->status = 'finished';
+            }
             return $res;
         });
         return response()->json($reservations, 200);
@@ -161,9 +153,8 @@ class ReservationsController extends Controller
     public function approveReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('approve', $reservation);
-        if($reservation->status !== 'pending')
-        {
-            return response()->json(['message'=>'the reservations is not pending'], 400);
+        if ($reservation->status !== 'pending') {
+            return response()->json(['message' => 'the reservations is not pending'], 400);
         }
         $data = $request->validate([
             'action' => 'required|in:approve,reject'
