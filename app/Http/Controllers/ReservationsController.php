@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ReservationsRequest;
-use App\Http\Requests\UpdteaReservationsRequest;
 use App\Models\Apartment;
 use App\Models\Reservations;
 use Carbon\Carbon;
@@ -12,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReservationsController extends Controller
 {
+    //=========================Store====================================================
     public function storeReservations(ReservationsRequest $request)
     {
         $data = $request->validated();
@@ -39,6 +39,8 @@ class ReservationsController extends Controller
             return response()->json($reservation, 201);
         });
     }
+    //=============================Update=======================================================
+
     public function updateReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('update', $reservation);
@@ -72,6 +74,7 @@ class ReservationsController extends Controller
             'reservation' => $reservation->fresh()
         ], 200);
     }
+    //===================================Cancel==============================================
     public function cancelReservation(Reservations $reservation)
     {
         $this->authorize('cancel', $reservation);
@@ -89,6 +92,7 @@ class ReservationsController extends Controller
             'cancelled_at' => now()->format('Y-m-d H:i:s')
         ], 200);
     }
+    //=================================Reservations user=================================================
     public function myReservations(Request $request)
     {
         $userId = $request->user()->id;
@@ -108,6 +112,7 @@ class ReservationsController extends Controller
             'rejected'  => Reservations::forUser($userId)->status('rejected')->get(),
         ], 200);
     }
+    //===========================================all reservaions in app=================================
     public function allReservations(Request $request)
     {
         $reservations = Reservations::orderBy('start_date', 'asc')->get()->map(function ($res) {
@@ -119,6 +124,7 @@ class ReservationsController extends Controller
         });
         return response()->json($reservations, 200);
     }
+    //===================================accept the reservaiont before owner===================================
     public function approveReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('approve', $reservation);
