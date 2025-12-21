@@ -82,7 +82,7 @@ class ReservationsController extends Controller
         {
             return response()->json(['message'=>'Reservation is already cancelled'], 200);
         }
-        if(now() < $reservation->cancellationDeadline())
+        if(now() > $reservation->cancellationDeadline())
         {
             return response()->json(['message'=>'the limited cancellation period has expired'], 400);
         }
@@ -97,19 +97,52 @@ class ReservationsController extends Controller
     {
         $userId = $request->user()->id;
         $statusFilter = $request->query('status');
+
         if ($statusFilter) {
-            $data = Reservations::forUser($userId)->status($statusFilter)->get();
+            $query = Reservations::forUser($userId);
+
+            if ($statusFilter === 'past') {
+                $data = $query->status('past')->get()
+                             ->map(function ($reservation) {
+
+                                 $reservation->display_status = 'past';
+                                 return $reservation;
+                             });
+            }
+            else
+            {
+                $data = $query->status($statusFilter)->get();
+            }
+
             return response()->json([
                 'count' => $data->count(),
                 'data' => $data
             ], 200);
         }
         return response()->json([
-            'pending'   => Reservations::forUser($userId)->status('pending')->get(),
-            'confirmed' => Reservations::forUser($userId)->status('confirmed')->get(),
-            'past'      => Reservations::forUser($userId)->status('past')->get(),
-            'cancelled' => Reservations::forUser($userId)->status('cancelled')->get(),
-            'rejected'  => Reservations::forUser($userId)->status('rejected')->get(),
+            'pending' => Reservations::forUser($userId)
+            ->status('pending')
+            ->get(),
+
+            'confirmed' => Reservations::forUser($userId)
+            ->status('confirmed')
+            ->get(),
+
+            'past' => Reservations::forUser($userId)
+            ->status('past')
+            ->get()
+            ->map(function ($reservation) {
+                $reservation->display_status = 'past';
+                return $reservation;
+            }),
+
+            'cancelled' => Reservations::forUser($userId)
+            ->status('cancelled')
+            ->get(),
+
+            'rejected' => Reservations::forUser($userId)
+            ->status('rejected')
+            ->get(),
         ], 200);
     }
     //===========================================all reservaions in app=================================
