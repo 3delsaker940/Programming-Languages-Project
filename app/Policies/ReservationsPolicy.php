@@ -21,8 +21,5 @@ class ReservationsPolicy
     {
         return $user->id === $reservation->apartment->owner_id;
     }
-    public function viewReservations(User $user)
-    {
-        return $user->type === 'admin';
-    }
+
 }

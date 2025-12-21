@@ -110,7 +110,6 @@ class ReservationsController extends Controller
     }
     public function allReservations(Request $request)
     {
-        $this->authorize('viewReservations',Reservations::class);
         $reservations = Reservations::orderBy('start_date', 'asc')->get()->map(function ($res) {
             if ($res->status === 'confirmed' && $res->end_date < now())
                 {
