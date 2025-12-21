@@ -10,7 +10,7 @@ class EnsureTenants
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->user()->tybe !== 'tenant')
+        if($request->user()->type !== 'tenant')
         {
             return response()->json(['message'=>'only tenants can perform this action '], 403);
         }

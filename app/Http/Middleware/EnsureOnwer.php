@@ -10,7 +10,7 @@ class EnsureOnwer
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->user()->tybe !== 'owner')
+        if($request->user()->type !== 'owner')
         {
             return response()->json(['message'=>'only owners can perform this action'], 403);
         }
