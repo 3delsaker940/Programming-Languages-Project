@@ -22,7 +22,7 @@ class ApartmentResource extends JsonResource
             'images' => $this->images->map(function($image) {
                 return [
                     'id' => $image->id,
-                    'path' => asset('storage/'.$image->apartment_image_path)
+                    'url' => url('storage/'.$image->apartment_image_path)
                 ];
             }),
         ];

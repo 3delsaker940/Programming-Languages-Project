@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Sanctum;
 
 //==================================== Auth ====================================================
 
@@ -35,7 +37,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function() {
 
 //=============================================== Admin ======================================
 
-
+Route::put('users/{user}/status', [AdminController::class, 'updateStatus']);
 
     //=====for test to delete user + his files =======================
     // Route::delete('user/delete/{user}',[ApartmentController::class, 'deleteUser'])->middleware('auth:sanctum');
