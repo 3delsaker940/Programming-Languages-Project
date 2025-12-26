@@ -16,17 +16,30 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('rooms')->index();
             $table->integer('bathrooms')->index();
+            $table->enum('type', ['apartment', 'house', 'villa', 'otherwise']);
             $table->integer('area')->index();
             $table->decimal('price', 10, 2)->index();
-            $table->string('city')->index();
+            $table->enum('city', [
+                'damascus',
+                'rif_dimashq',
+                'aleppo',
+                'homs',
+                'hama',
+                'latakia',
+                'tartus',
+                'idlib',
+                'deir_ez_zor',
+                'raqqa',
+                'al_hasakah',
+                'daraa',
+                'as_suwayda',
+                'quneitra',
+            ])->index();
             $table->enum('status', ['available', 'rented'])->default('available');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('apartments');

@@ -7,7 +7,7 @@ use Storage;
 
 class Apartment extends Model
 {
-    protected $fillable = ['title', 'description', 'rooms', 'bathrooms', 'area', 'price', 'city', 'status', 'owner_id'];
+    protected $guarded = [];
 
     public function user()
     {
