@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReservationsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Sanctum;
 
 //==================================== Auth ====================================================
 
@@ -59,7 +61,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
-
+Route::put('users/{user}/status', [AdminController::class, 'updateStatus']);
 
 
 
