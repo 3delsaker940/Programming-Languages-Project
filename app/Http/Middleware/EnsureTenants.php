@@ -6,20 +6,14 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckUserStatus
+class EnsureTenants
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-
-        if($user && $user->status !== 'active')
+        if($request->user()->type !== 'tenant')
         {
-            return response()->json([
-                'message' => 'Your account is not active.',
-                'status' => $user->status
-            ], 403);
+            return response()->json(['message'=>'only tenants can perform this action '], 403);
         }
-
         return $next($request);
     }
 }

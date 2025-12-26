@@ -41,16 +41,16 @@ class ApartmentController extends Controller
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path = $image->storeAs($folder, $filename, 'public');
 
-                        ApartmentImages::create([
-                            'apartment_id' => $apartment->id,
-                            'apartment_image_path' => $path
-                        ]);
-                    }
+                ApartmentImages::create([
+                    'apartment_id' => $apartment->id,
+                    'apartment_image_path' => $path
+                ]);
             }
+        }
 
         //================================================
         $apartmentWithImages = $apartment->load('images')->toArray();
-        $apartmentWithImages['images'] = collect($apartmentWithImages['images'])->map(function ($img){
+        $apartmentWithImages['images'] = collect($apartmentWithImages['images'])->map(function ($img) {
             return [
                 'id' => $img['id'],
                 'url' => asset('storage/' . $img['apartment_image_path'])
@@ -143,7 +143,7 @@ class ApartmentController extends Controller
         $query->whereBetween('area', [$min_area, $max_area]);
 
         $apartments = $query->paginate(8);
-        return response()->json($apartments, 200);
+        return ApartmentResource::collection($apartments);
     }
 
     //---- IN ALL THIS FUNCTIONS YOU SHOULD BE ACCEPTED IN THE APP (have token) -------

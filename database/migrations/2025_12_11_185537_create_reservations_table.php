@@ -8,19 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('_reservations', function (Blueprint $table) {
+        Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->date('start_date');
             $table->date('end_date');
             $table->foreignID('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignID('apartment_id')->constrained('apartments')->cascadeOnDelete();
-            $table->enum('status', ['pending','confirmed','cancelled'])->default('confirmed');
+            $table->enum('status', ['pending','confirmed','cancelled','rejected'])->default('pending');
             $table->index(['apartment_id', 'start_date', 'end_date']);
             $table->timestamps();
         });
     }
+
     public function down(): void
     {
-        Schema::dropIfExists('_reservations');
+        Schema::dropIfExists('reservations');
     }
 };

@@ -21,10 +21,11 @@ class ReservationsRequest extends FormRequest
      */
     public function rules(): array
     {
+
         return [
             'apartment_id'=>'required|exists:apartments,id',
             'user_id'=>'required|exists:users,id',
-            'start_date'=>'required|date|before:end_date',
+            'start_date'=>'required|date|after:yesterday',
             'end_date'=>'required|date|after:start_date'
         ];
     }
