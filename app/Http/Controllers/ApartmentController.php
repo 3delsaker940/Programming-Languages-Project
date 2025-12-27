@@ -37,7 +37,8 @@ class ApartmentController extends Controller
         if ($request->hasFile('images')) {
             $folder = "apartments/{$user->id}/{$apartment->id}";
             foreach ($request->file('images') as $image) {
-                $filename = time() . '_' . $image->getClientOriginalName();
+                // $filename = time() . '_' . $image->getClientOriginalName();
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path = $image->storeAs($folder, $filename, 'public');
 
                 ApartmentImages::create([
@@ -106,7 +107,8 @@ class ApartmentController extends Controller
 
             foreach ($request->file('images') as $image) {
 
-                $filename = time() . '_' . $image->getClientOriginalName();
+                // $filename = time() . '_' . $image->getClientOriginalName();
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path = $image->storeAs($folder, $filename, 'public');
 
                 $apartment->images()->create([
