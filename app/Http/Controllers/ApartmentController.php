@@ -57,7 +57,9 @@ class ApartmentController extends Controller
         });
 
 
-        return response()->json($apartmentWithImages, 200);
+        return response()->json([
+            'message' => "Created Successfully"
+        ], 201);
     }
 
 

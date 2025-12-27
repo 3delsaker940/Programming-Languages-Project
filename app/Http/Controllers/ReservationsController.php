@@ -36,7 +36,9 @@ class ReservationsController extends Controller
                 return response()->json(['message' => 'The dates are conflicting with an existing reservation'], 422);
             }
             $reservation->save();
-            return response()->json($reservation, 201);
+            return response()->json([
+                'message' => "Booked Successfully"
+            ], 201);
         });
     }
     //=============================Update=======================================================
@@ -147,9 +149,10 @@ class ReservationsController extends Controller
             }
             return $res;
         });
-        return response()->json($reservations, 200);
+        $ans = $reservations->paginate(8);
+        return response()->json($ans, 200);
     }
-    //===================================accept the reservaiont before owner===================================
+    //===================================approved by owner===================================
     public function approveReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('approve', $reservation);
