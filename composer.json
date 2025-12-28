@@ -9,6 +9,8 @@
         "php": "^8.2",
         "google/cloud-vision": "^2.1",
         "idanalyzer/id-analyzer-v2-php-sdk": "^1.0",
+        "kreait/laravel-firebase": "^6.2",
+        "laravel-notification-channels/fcm": "^5.1",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1"
