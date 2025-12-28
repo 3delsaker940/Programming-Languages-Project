@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class Reservations extends Model
 {
-    protected $fillable = ['user_id', 'apartment_id', 'start_date', 'end_date', 'status'];
+    protected $guarded = [];
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',

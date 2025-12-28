@@ -46,6 +46,11 @@ class ReservationsController extends Controller
     public function updateReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('update', $reservation);
+
+        $request->validate([
+            'start_date' => 'sometimes|date|after_or_equal:today',
+            'end_date' => 'sometimes|date|after:start_date',
+        ]);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'the Reservation is canceled'], 400);
         }
@@ -55,10 +60,6 @@ class ReservationsController extends Controller
         if ($reservation->isCurrent()) {
             return response()->json(['message' => 'No , it is possible to modify a reservation that started'], 400);
         }
-        $request->validate([
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after:start_date',
-        ]);
         $startAt = Carbon::parse($request->start_date);
         $endAt = Carbon::parse($request->end_date);
         if ($reservation->isOverlapping($startAt, $endAt)) {

@@ -27,4 +27,8 @@ class Apartment extends Model
     {
         return $this->belongsToMany(User::class, 'favorites');
     }
+    public function ratings()
+    {
+        return $this->belongsToMany(User::class, 'ratings');
+    }
 }

@@ -21,5 +21,4 @@ class ReservationsPolicy
     {
         return $user->id === $reservation->apartment->owner_id;
     }
-
 }
