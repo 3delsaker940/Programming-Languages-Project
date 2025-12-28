@@ -8,6 +8,7 @@ use App\Models\Reservations;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\NewReservationNotification;
 
 class ReservationsController extends Controller
 {
@@ -15,53 +16,69 @@ class ReservationsController extends Controller
     public function storeReservations(ReservationsRequest $request)
     {
         $data = $request->validated();
-        $startDate = new Carbon($data['start_date']);
-        $endDate = new Carbon($data['end_date']);
+        $startDate = Carbon::parse($data['start_date']);
+        $endDate   = Carbon::parse($data['end_date']);
         $apartmentId = $data['apartment_id'];
-        $userId = $request->user()->id;
-        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId) {
-            $apartment = Apartment::where('id', $apartmentId)->lockForUpdate()->first();
+        $user = $request->user();
+        $reservation = DB::transaction(function () use ($startDate, $endDate, $apartmentId, $user) {
+            $apartment = Apartment::where('id', $apartmentId)
+                ->lockForUpdate()
+                ->first();
             if (!$apartment) {
-                return response()->json(['message' => 'Apartment not found'], 404);
+                abort(404, 'Apartment not found');
             }
-            $this->authorize('rent', $apartment);
-            $reservation = new Reservations([
+            $overlapping = Reservations::overlapping(
+                $apartmentId,
+                $startDate,
+                $endDate
+            )->lockForUpdate()->exists();
+            if ($overlapping) {
+                abort(422, 'The dates are conflicting with an existing reservation');
+            }
+            $reservation = Reservations::create([
                 'apartment_id' => $apartmentId,
-                'user_id' => $userId,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'status' => 'pending'
+                'user_id'      => $user->id,
+                'start_date'   => $startDate,
+                'end_date'     => $endDate,
+                'status'       => 'pending',
             ]);
-            if ($reservation->isOverlapping($startDate, $endDate)) {
-                return response()->json(['message' => 'The dates are conflicting with an existing reservation'], 422);
-            }
-            $reservation->save();
-            return response()->json([
-                'message' => "Booked Successfully"
-            ], 201);
+            return $reservation;
         });
+        $owner = $reservation->apartment->user;
+
+        $notification = new NewReservationNotification(
+            $reservation->id,
+            $user->name
+        );
+        $owner->notify($notification);
+        $notification->sendFCM($owner);
+        return response()->json([
+            'message' => 'Booked Successfully',
+            'reservation_id' => $reservation->id
+        ], 201);
     }
+
     //=============================Update=======================================================
 
     public function updateReservation(Reservations $reservation, Request $request)
     {
-        $this->authorize('update', $reservation);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'the Reservation is canceled'], 400);
         }
-        if ($reservation->isFinished()) {
+        if ($reservation->isfinished()) {
             return response()->json(['message' => 'An expired reservation cannot be modified'], 400);
         }
         if ($reservation->isCurrent()) {
             return response()->json(['message' => 'No , it is possible to modify a reservation that started'], 400);
         }
         $request->validate([
-            'start_date' => 'required|date|after_or_equal:today',
+            'start_date' => 'required|date|after:yesterday',
             'end_date' => 'required|date|after:start_date',
         ]);
         $startAt = Carbon::parse($request->start_date);
         $endAt = Carbon::parse($request->end_date);
-        if ($reservation->isOverlapping($startAt, $endAt)) {
+        $overlapping = Reservations::overlappingExceptReservation($reservation->apartment_id,$startAt,$endAt,$reservation->id)->exists();
+        if ($overlapping) {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
         $reservation->update([
@@ -76,7 +93,6 @@ class ReservationsController extends Controller
     //===================================Cancel==============================================
     public function cancelReservation(Reservations $reservation)
     {
-        $this->authorize('cancel', $reservation);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'Reservation is already cancelled'], 200);
         }
@@ -155,21 +171,28 @@ class ReservationsController extends Controller
     //===================================approved by owner===================================
     public function approveReservation(Reservations $reservation, Request $request)
     {
-        $this->authorize('approve', $reservation);
         if ($reservation->status !== 'pending') {
             return response()->json(['message' => 'the reservations is not pending'], 400);
         }
         $data = $request->validate([
             'action' => 'required|in:approve,reject'
         ]);
-        if ($data['action'] === 'reject') {
+        if ($data['action'] === 'reject')
+        {
             $reservation->update(['status' => 'rejected']);
             return response()->json([
                 'message' => 'Reservation rejected successfully',
                 'reservation' => $reservation
             ], 200);
         }
-        if ($reservation->isOverlapping($reservation->start_date, $reservation->end_date)) {
+        $overlapping = Reservations::overlappingExceptReservation(
+            $reservation->apartment_id,
+            $reservation->start_date,
+            $reservation->end_date,
+            $reservation->id
+        )->exists();
+        if ($overlapping)
+        {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
         $reservation->update(['status' => 'confirmed']);

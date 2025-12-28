@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class Reservations extends Model
 {
@@ -54,17 +53,6 @@ class Reservations extends Model
     {
         return $this->start_date <= now() && $this->end_date >= now();
     }
-    public function isOverlapping($startAt, $endAt)
-    {
-        return self::where('apartment_id', $this->apartment_id)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->where('id', '!=', $this->id ?? 0)
-            ->where(function ($q) use ($startAt, $endAt) {
-                $q->where('start_date', '<', $endAt)
-                    ->where('end_date', '>', $startAt);
-            })->exists();
-    }
-
     public function cancellationDeadline()
     {
         return $this->start_date->copy()->subDay();

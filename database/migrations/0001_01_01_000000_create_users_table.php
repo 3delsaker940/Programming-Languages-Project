@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('id_photo_back');
             $table->enum('status', ['pending', 'rejected', 'frozen', 'active'])->default('pending');
             $table->enum('type', ['tenant', 'owner', 'admin'])->default('tenant');
+            $table->text('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -39,8 +39,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
     //===========================Reservations============================================
     Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
-        Route::post('reservations', [ReservationsController::class, 'storeReservations']);
-        Route::put('reservations/{reservation}', [ReservationsController::class, 'updateReservation']);
+        Route::post('reservations/make', [ReservationsController::class, 'storeReservations']);
+        Route::put('reservations/{reservation}/update', [ReservationsController::class, 'updateReservation']);
         Route::post('reservations/{reservation}/cancel', [ReservationsController::class, 'cancelReservation']);
         Route::get('my-reservations', [ReservationsController::class, 'myReservations']);
     });
