@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,6 +38,10 @@ class User extends Authenticatable
     public function favoritesApartment()
     {
         return $this->belongsToMany(Apartment::class, 'favorites');
+    }
+    public function apartmentRatings()
+    {
+        return $this->belongsToMany(Apartment::class, 'ratings');
     }
 
     //==============for delete user + his file ==============

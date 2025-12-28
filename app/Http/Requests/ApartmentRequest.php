@@ -18,6 +18,7 @@ class ApartmentRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'rate' => 'nullable',
             'type' => ['required', Rule::in(['apartment', 'house', 'villa', 'otherwise'])],
             'price' => 'required|numeric',
             'rooms' => 'required|integer',
