@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\Http;
 class NewReservationNotification extends Notification implements ShouldQueue
 {
     use Queueable;
-
     protected $reservationId;
     protected $renterName;
-
     public function __construct($reservationId, $renterName)
     {
         $this->reservationId = $reservationId;
@@ -36,7 +34,6 @@ class NewReservationNotification extends Notification implements ShouldQueue
         if (!$notifiable->fcm_token) {
             return;
         }
-
         Http::withHeaders([
             'Authorization' => 'key=' . env('FCM_SERVER_KEY'),
             'Content-Type' => 'application/json',

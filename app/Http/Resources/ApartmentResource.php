@@ -15,6 +15,7 @@ class ApartmentResource extends JsonResource
             'title' => $this->title,
             'type' => $this->type,
             'description' => $this->description,
+            'rate' => $this->rate !== null ? round((float) $this->rate, 1) : null,
             'price' => $this->price,
             'city' => $this->city,
             'area' => $this->area,

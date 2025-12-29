@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Apartment;
 use App\Models\User;
+use App\Models\Reservations;
 use Illuminate\Auth\Access\Response;
 
 class ApartmentPolicy
@@ -32,5 +33,15 @@ class ApartmentPolicy
     public function rent(User $user, Apartment $apartment): bool
     {
         return $user->type === 'tenant' && $apartment->status === 'available';
+    }
+
+    public function canRate(User $user, Apartment $apartment): bool
+    {
+        return Reservations::query()
+            ->where('user_id', $user->id)
+            ->where('apartment_id', $apartment->id)
+            ->where('status', 'confirmed')
+            ->where('end_date', '<=', now())
+            ->exists();
     }
 }
