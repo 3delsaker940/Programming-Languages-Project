@@ -23,9 +23,9 @@ class ReservationsRequest extends FormRequest
     {
 
         return [
-            'apartment_id' => 'required|exists:apartments,id',
-            'start_date' => 'required|date|after:yesterday',
-            'end_date' => 'required|date|after:start_date'
+            'apartment_id'=>'required|exists:apartments,id',
+            'start_date'=>'required|date|after:yesterday',
+            'end_date'=>'required|date|after:start_date'
         ];
     }
 }

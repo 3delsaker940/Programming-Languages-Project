@@ -7,7 +7,7 @@ use App\Models\User;
 
 class ReservationsPolicy
 {
-    public function update(User $user, Reservations $reservation)
+     public function update(User $user, Reservations $reservation)
     {
         return $user->id === $reservation->user_id;
     }
@@ -16,7 +16,6 @@ class ReservationsPolicy
     {
         return $user->id === $reservation->user_id;
     }
-
     public function approve(User $user, Reservations $reservation)
     {
         return $user->id === $reservation->apartment->owner_id;

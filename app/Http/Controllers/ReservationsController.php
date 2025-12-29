@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\NewReservationNotification;
+use Illuminate\Auth\Middleware\Authorize;
 
 class ReservationsController extends Controller
 {
@@ -27,6 +28,7 @@ class ReservationsController extends Controller
             if (!$apartment) {
                 abort(404, 'Apartment not found');
             }
+            $this->authorize('rent',$apartment);
             $overlapping = Reservations::overlapping(
                 $apartmentId,
                 $startDate,
@@ -62,12 +64,11 @@ class ReservationsController extends Controller
 
     public function updateReservation(Reservations $reservation, Request $request)
     {
-        $this->authorize('update', $reservation);
-
-        $request->validate([
-            'start_date' => 'sometimes|date|after:yesterday',
-            'end_date' => 'sometimes|date|after:start_date',
-        ]);
+        $this->authorize('update',$reservation);
+        if($reservation->status !== 'pending')
+        {
+            return response()->json(['message'=>'the reservation cannot be modified after acceptance'],400);
+        }
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'the Reservation is canceled'], 400);
         }
@@ -77,24 +78,41 @@ class ReservationsController extends Controller
         if ($reservation->isCurrent()) {
             return response()->json(['message' => 'No , it is possible to modify a reservation that started'], 400);
         }
+        $request->validate([
+            'start_date' => 'required|date|after:yesterday',
+            'end_date' => 'required|date|after:start_date',
+        ]);
         $startAt = Carbon::parse($request->start_date);
         $endAt = Carbon::parse($request->end_date);
-        $overlapping = Reservations::overlappingExceptReservation($reservation->apartment_id, $startAt, $endAt, $reservation->id)->exists();
+        $overlapping = Reservations::overlappingExceptReservation($reservation->apartment_id,$startAt,$endAt,$reservation->id)->lockForUpdate()->exists();
         if ($overlapping) {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
+        $reservation->apartment->user
+        ->notifications()
+        ->where('data->reservation_id', $reservation->id)
+        ->delete();
         $reservation->update([
             'start_date' => $startAt,
-            'end_date' => $endAt
+            'end_date' => $endAt,
+            'status'=>'pending',
         ]);
+            $owner = $reservation->apartment->user;
+        $notification = new NewReservationNotification(
+            $reservation->id,
+            $reservation->user->name
+        );
+        $owner->notify($notification);
+        $notification->sendFCM($owner);
         return response()->json([
-            'message' => 'Reservation updated successfully',
+            'message' => 'The modification of the reservation has been accepted and wation for the lessors approval',
             'reservation' => $reservation->fresh()
         ], 200);
     }
     //===================================Cancel==============================================
     public function cancelReservation(Reservations $reservation)
     {
+        $this->authorize('cancel',$reservation);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'Reservation is already cancelled'], 200);
         }
@@ -112,54 +130,70 @@ class ReservationsController extends Controller
     {
         $userId = $request->user()->id;
         $statusFilter = $request->query('status');
-
         if ($statusFilter) {
-            $query = Reservations::forUser($userId);
+        $reservations = Reservations::forUser($userId)
+            ->status($statusFilter)
+            ->with([
+                'apartment:id,title,price,city',
+                'apartment.images:id,apartment_id,apartment_image_path'
+            ])
+            ->get()
+            ->map(function ($reservation) use ($statusFilter) {
+                return [
+                    'reservation_id' => $reservation->id,
+                    'status' => $reservation->status,
+                    'start_date' => $reservation->start_date,
+                    'end_date' => $reservation->end_date,
+                    'display_status' => $statusFilter === 'finished' ? 'finished' : null,
+                    'apartment' => [
+                        'title' => $reservation->apartment->title,
+                        'price' => $reservation->apartment->price,
+                        'city' => $reservation->apartment->city,
+                        'image' => optional($reservation->apartment->images->first())->apartment_image_path,
+                    ],
+                ];
+            });
 
-            if ($statusFilter === 'finished') {
-                $data = $query->status('finished')->get()
-                    ->map(function ($reservation) {
-
-                        $reservation->display_status = 'finished';
-                        return $reservation;
-                    });
-            } else {
-                $data = $query->status($statusFilter)->get();
-            }
-
-            return response()->json([
-                'count' => $data->count(),
-                'data' => $data
-            ], 200);
-        }
         return response()->json([
-            'pending' => Reservations::forUser($userId)
-                ->status('pending')
-                ->get(),
-
-            'confirmed' => Reservations::forUser($userId)
-                ->status('confirmed')
-                ->get(),
-
-            'finished' => Reservations::forUser($userId)
-                ->status('finished')
-                ->get()
-                ->map(function ($reservation) {
-                    $reservation->display_status = 'finished';
-                    return $reservation;
-                }),
-
-            'cancelled' => Reservations::forUser($userId)
-                ->status('cancelled')
-                ->get(),
-
-            'rejected' => Reservations::forUser($userId)
-                ->status('rejected')
-                ->get(),
+            'count' => $reservations->count(),
+            'data' => $reservations
         ], 200);
+        }
+
+        $statuses = ['pending', 'confirmed', 'finished', 'cancelled', 'rejected'];
+        $result = [];
+
+        foreach ($statuses as $status) {
+        $reservations = Reservations::forUser($userId)
+            ->status($status)
+            ->with([
+                'apartment:id,title,price,city',
+                'apartment.images:id,apartment_id,apartment_image_path'
+            ])
+            ->get()
+            ->map(function ($reservation) use ($status) {
+                return [
+                    'reservation_id' => $reservation->id,
+                    'status' => $reservation->status,
+                    'start_date' => $reservation->start_date,
+                    'end_date' => $reservation->end_date,
+                    'display_status' => $status === 'finished' ? 'finished' : null,
+                    'apartment' => [
+                        'title' => $reservation->apartment->title,
+                        'price' => $reservation->apartment->price,
+                        'city' => $reservation->apartment->city,
+                        'image' => optional($reservation->apartment->images->first())->apartment_image_path,
+                    ],
+                ];
+            });
+
+        $result[$status] = $reservations;
+        }
+
+        return response()->json($result, 200);
     }
     //===========================================all reservaions in app=================================
-    public function allReservations(Request $request)
+    public function allReservations()
     {
         $reservations = Reservations::orderBy('start_date', 'asc')->get()->map(function ($res) {
             if ($res->status === 'confirmed' && $res->end_date < now()) {
@@ -173,13 +207,15 @@ class ReservationsController extends Controller
     //===================================approved by owner===================================
     public function approveReservation(Reservations $reservation, Request $request)
     {
+        $this->authorize('approve',$reservation);
         if ($reservation->status !== 'pending') {
             return response()->json(['message' => 'the reservations is not pending'], 400);
         }
         $data = $request->validate([
             'action' => 'required|in:approve,reject'
         ]);
-        if ($data['action'] === 'reject') {
+        if ($data['action'] === 'reject')
+        {
             $reservation->update(['status' => 'rejected']);
             return response()->json([
                 'message' => 'Reservation rejected successfully',
@@ -192,7 +228,8 @@ class ReservationsController extends Controller
             $reservation->end_date,
             $reservation->id
         )->exists();
-        if ($overlapping) {
+        if ($overlapping)
+        {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
         $reservation->update(['status' => 'confirmed']);
