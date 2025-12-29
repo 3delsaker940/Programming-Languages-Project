@@ -96,18 +96,39 @@ class ReservationsController extends Controller
         $userId = $request->user()->id;
         $statusFilter = $request->query('status');
 
+        $query = Reservations::with(['apartment.images'])->forUser($userId);
+
         if ($statusFilter) {
-            $query = Reservations::forUser($userId);
+            // $query = Reservations::forUser($userId);
 
             if ($statusFilter === 'finished') {
                 $data = $query->status('finished')->get()
                     ->map(function ($reservation) {
 
                         $reservation->display_status = 'finished';
+
+                        $reservation->apartment_details = [
+                            'name' => $reservation->apartment->title ?? null,
+                            'price' => $reservation->apartment->price ?? null,
+                            'city' => $reservation->apartment->city ?? null,
+                            'first_image' => $reservation->apartment->images->first()
+                                ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                                : null
+                        ];
                         return $reservation;
                     });
             } else {
-                $data = $query->status($statusFilter)->get();
+                $data = $query->status($statusFilter)->get()->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    return $reservation;
+                });
             }
 
             return response()->json([
@@ -115,30 +136,97 @@ class ReservationsController extends Controller
                 'data' => $data
             ], 200);
         }
+
         return response()->json([
-            'pending' => Reservations::forUser($userId)
+            'pending' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('pending')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
+                    return $reservation;
+                }),
 
-            'confirmed' => Reservations::forUser($userId)
+            'confirmed' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('confirmed')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
 
-            'finished' => Reservations::forUser($userId)
+                    return $reservation;
+                }),
+
+            'finished' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('finished')
                 ->get()
                 ->map(function ($reservation) {
                     $reservation->display_status = 'finished';
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
+
                     return $reservation;
                 }),
 
-            'cancelled' => Reservations::forUser($userId)
+            'cancelled' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('cancelled')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
 
-            'rejected' => Reservations::forUser($userId)
+                    return $reservation;
+                }),
+
+            'rejected' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('rejected')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
+
+                    return $reservation;
+                }),
         ], 200);
     }
     //===========================================all reservaions in app=================================
