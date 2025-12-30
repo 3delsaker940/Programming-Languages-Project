@@ -10,8 +10,8 @@ class Reservations extends Model
 {
     protected $guarded = [];
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date' => 'date:Y/m/d',
+        'end_date' => 'date:Y/m/d',
     ];
     public function user()
     {
