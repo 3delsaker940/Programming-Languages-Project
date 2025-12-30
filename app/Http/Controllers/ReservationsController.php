@@ -25,11 +25,14 @@ class ReservationsController extends Controller
                 return response()->json(['message' => 'Apartment not found'], 404);
             }
             $this->authorize('rent', $apartment);
+            $days = $startDate->diffInDays($endDate);
+            $total_price = $days * $apartment->price;
             $reservation = new Reservations([
                 'apartment_id' => $apartmentId,
                 'user_id' => $userId,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'total_price' => $total_price,
                 'status' => 'pending'
             ]);
             if ($reservation->isOverlapping($startDate, $endDate)) {
@@ -37,7 +40,8 @@ class ReservationsController extends Controller
             }
             $reservation->save();
             return response()->json([
-                'message' => "Booked Successfully"
+                'message' => "Booked Successfully",
+                'Total Cost' => $total_price
             ], 201);
         });
     }
@@ -62,13 +66,18 @@ class ReservationsController extends Controller
         }
         $startAt = Carbon::parse($request->start_date);
         $endAt = Carbon::parse($request->end_date);
+        $days = $startAt->diffInDays($endAt);
+        $daily_price = $reservation->apartment->price;
+        $total_price = $days * $daily_price;
         if ($reservation->isOverlapping($startAt, $endAt)) {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
         $reservation->update([
             'start_date' => $startAt,
-            'end_date' => $endAt
+            'end_date' => $endAt,
+            'total_price' => $total_price
         ]);
+
         return response()->json([
             'message' => 'Reservation updated successfully',
             'reservation' => $reservation->fresh()
