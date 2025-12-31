@@ -198,10 +198,9 @@ class ApartmentController extends Controller
     }
 
 
-    public function rateAnApartment($apartmentId, RateApartmentRequest $request)
+    public function rateAnApartment(RateApartmentRequest $request)
     {
-        $apartment = Apartment::findOrFail($apartmentId);
-
+        $apartment = Apartment::findOrFail($request->apartment_id);
         $this->authorize('canRate', $apartment);
         $user = Auth::user();
         Rating::updateOrCreate(
