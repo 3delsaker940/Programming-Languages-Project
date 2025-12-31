@@ -61,15 +61,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
-Route::put('users/{user}/status', [AdminController::class, 'updateStatus']);
+Route::middleware(['admin'])->group(function () {
+    Route::put('users/{user}/status', [AdminController::class, 'updateStatus']);
+    Route::get('users/{user}', [AdminController::class, 'show']);
+    Route::get('user/id-photo/back/{id}', [UserController::class, 'idPhotoBack']);
+    Route::get('user/id-photo/front/{id}', [UserController::class, 'idPhotoFront']);
+    Route::delete('user/delete/{user}', [AdminController::class, 'deleteUser']);
+    Route::delete('apartments/{apartment}', [AdminController::class, 'destroy']);
+
+});
 
 
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('user/verfied/{id}', [UserController::class, 'ChangeUserStatusToActive']);
-    Route::get('user/id-photo/front/{id}', [UserController::class, 'idPhotoFront']);
-    Route::get('view-all-reservations',[ReservationsController::class,'allReservations']);
-    Route::get('user/id-photo/back/{id}', [UserController::class, 'idPhotoBack']);
+    Route::get('view-all-reservations', [ReservationsController::class, 'allReservations']);
 });
-    //=====for test to delete user + his files =======================
-    // Route::delete('user/delete/{user}',[ApartmentController::class, 'deleteUser'])->middleware('auth:sanctum');
+

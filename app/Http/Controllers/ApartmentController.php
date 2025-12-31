@@ -194,15 +194,7 @@ class ApartmentController extends Controller
     }
 
     //=====for test to delete user + his files =======================
-    // public function deleteUser(User $user)
-    // {
-
-    //     $user->delete();
-
-    //     return response()->json([
-    //         'message'=> 'User deleted'
-    //     ]);
-    // }
+    
     //==========================================================
 
 }
