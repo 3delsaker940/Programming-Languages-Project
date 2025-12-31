@@ -41,14 +41,14 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/idApartments/{apartment}', [ApartmentController::class, 'showIdApartment']);
         Route::get('/user/{userId}', [ApartmentController::class, 'usersApartments']);
         Route::get('/myApartments', [ApartmentController::class, 'myApartments']);
-        Route::post('/{apartmentId}/rate', [ApartmentController::class, 'rateAnApartment']);
+        Route::post('/rate', [ApartmentController::class, 'rateAnApartment']);
     });
     //===========================Reservations============================================
     Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
         Route::prefix('reservations')->group(function () {
             Route::post('/make', [ReservationsController::class, 'storeReservations']);
-            Route::put('/{reservation}/update', [ReservationsController::class, 'updateReservation']);
-            Route::post('/{reservation}/cancel', [ReservationsController::class, 'cancelReservation']);
+            Route::put('/update', [ReservationsController::class, 'updateReservation']);
+            Route::post('/cancel', [ReservationsController::class, 'cancelReservation']);
             Route::get('/my-reservations', [ReservationsController::class, 'myReservations']);
         });
     });

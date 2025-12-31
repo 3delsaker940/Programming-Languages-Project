@@ -15,6 +15,7 @@ class RateApartmentRequest extends FormRequest
     {
         return [
             'rate' => 'required|between:0.5,5|',
+            'apartment_id' => 'required|exists:apartments,id|integer',
             'comment' => 'sometimes|string|nullable'
         ];
     }

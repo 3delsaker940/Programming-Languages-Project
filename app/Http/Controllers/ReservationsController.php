@@ -47,14 +47,16 @@ class ReservationsController extends Controller
     }
     //=============================Update=======================================================
 
-    public function updateReservation(Reservations $reservation, Request $request)
+    public function updateReservation(Request $request)
     {
+        $request->validate([
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after:start_date',
+            'reservation_id' => 'required|exists:reservations,id|integer'
+        ]);
+        $reservation = Reservations::findOrFail($request->reservation_id);
         $this->authorize('update', $reservation);
 
-        $request->validate([
-            'start_date' => 'sometimes|date|after_or_equal:today',
-            'end_date' => 'sometimes|date|after:start_date',
-        ]);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'the Reservation is canceled'], 400);
         }
@@ -84,8 +86,12 @@ class ReservationsController extends Controller
         ], 200);
     }
     //===================================Cancel==============================================
-    public function cancelReservation(Reservations $reservation)
+    public function cancelReservation(Request $request)
     {
+        $request->validate([
+            'reservation_id' => 'required|exists:reservations,id'
+        ]);
+        $reservation = Reservations::findOrFail($request->reservation_id);
         $this->authorize('cancel', $reservation);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'Reservation is already cancelled'], 200);
