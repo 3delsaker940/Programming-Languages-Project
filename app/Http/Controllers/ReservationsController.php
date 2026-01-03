@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ReservationsRequest;
 use App\Models\Apartment;
 use App\Models\Reservations;
+use App\Notifications\NewReservationNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,8 @@ class ReservationsController extends Controller
         $endDate = new Carbon($data['end_date']);
         $apartmentId = $data['apartment_id'];
         $userId = $request->user()->id;
-        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId) {
+        $user= $request->user;
+        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId,$user) {
             $apartment = Apartment::where('id', $apartmentId)->lockForUpdate()->first();
             if (!$apartment) {
                 return response()->json(['message' => 'Apartment not found'], 404);
@@ -39,11 +41,19 @@ class ReservationsController extends Controller
                 return response()->json(['message' => 'The dates are conflicting with an existing reservation'], 422);
             }
             $reservation->save();
-            return response()->json([
-                'message' => "Booked Successfully",
-                'Total Cost' => $total_price
-            ], 201);
-        });
+            $owner = $reservation->apartment->user;
+
+            $notification = new NewReservationNotification(
+                $reservation->id,
+                $user->name
+            );
+            $owner->notify($notification);
+            $notification->sendFCM($owner);
+                return response()->json([
+                    'message' => "Booked Successfully",
+                    'Total Cost' => $total_price
+                ], 201);
+            });
     }
     //=============================Update=======================================================
 
@@ -74,12 +84,22 @@ class ReservationsController extends Controller
         if ($reservation->isOverlapping($startAt, $endAt)) {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
+        $reservation->apartment->user
+        ->notifications()
+        ->where('data->reservation_id', $reservation->id)
+        ->delete();
         $reservation->update([
             'start_date' => $startAt,
             'end_date' => $endAt,
             'total_price' => $total_price
         ]);
-
+        $owner = $reservation->apartment->user;
+        $notification = new NewReservationNotification(
+            $reservation->id,
+            $reservation->user->name
+        );
+        $owner->notify($notification);
+        $notification->sendFCM($owner);
         return response()->json([
             'message' => 'Reservation updated successfully',
             'reservation' => $reservation->fresh()
