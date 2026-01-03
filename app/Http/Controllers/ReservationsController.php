@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ReservationsRequest;
 use App\Models\Apartment;
 use App\Models\Reservations;
+use App\Notifications\NewReservationNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,31 +20,53 @@ class ReservationsController extends Controller
         $endDate = new Carbon($data['end_date']);
         $apartmentId = $data['apartment_id'];
         $userId = $request->user()->id;
-        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId) {
+        $user= $request->user;
+        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId,$user) {
             $apartment = Apartment::where('id', $apartmentId)->lockForUpdate()->first();
             if (!$apartment) {
                 return response()->json(['message' => 'Apartment not found'], 404);
             }
             $this->authorize('rent', $apartment);
+            $days = $startDate->diffInDays($endDate);
+            $total_price = $days * $apartment->price;
             $reservation = new Reservations([
                 'apartment_id' => $apartmentId,
                 'user_id' => $userId,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'total_price' => $total_price,
                 'status' => 'pending'
             ]);
             if ($reservation->isOverlapping($startDate, $endDate)) {
                 return response()->json(['message' => 'The dates are conflicting with an existing reservation'], 422);
             }
             $reservation->save();
-            return response()->json($reservation, 201);
-        });
+            $owner = $reservation->apartment->user;
+
+            $notification = new NewReservationNotification(
+                $reservation->id,
+                $user->name
+            );
+            $owner->notify($notification);
+            $notification->sendFCM($owner);
+                return response()->json([
+                    'message' => "Booked Successfully",
+                    'Total Cost' => $total_price
+                ], 201);
+            });
     }
     //=============================Update=======================================================
 
-    public function updateReservation(Reservations $reservation, Request $request)
+    public function updateReservation(Request $request)
     {
+        $request->validate([
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after:start_date',
+            'reservation_id' => 'required|exists:reservations,id|integer'
+        ]);
+        $reservation = Reservations::findOrFail($request->reservation_id);
         $this->authorize('update', $reservation);
+
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'the Reservation is canceled'], 400);
         }
@@ -53,27 +76,42 @@ class ReservationsController extends Controller
         if ($reservation->isCurrent()) {
             return response()->json(['message' => 'No , it is possible to modify a reservation that started'], 400);
         }
-        $request->validate([
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after:start_date',
-        ]);
         $startAt = Carbon::parse($request->start_date);
         $endAt = Carbon::parse($request->end_date);
+        $days = $startAt->diffInDays($endAt);
+        $daily_price = $reservation->apartment->price;
+        $total_price = $days * $daily_price;
         if ($reservation->isOverlapping($startAt, $endAt)) {
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
+        $reservation->apartment->user
+        ->notifications()
+        ->where('data->reservation_id', $reservation->id)
+        ->delete();
         $reservation->update([
             'start_date' => $startAt,
-            'end_date' => $endAt
+            'end_date' => $endAt,
+            'total_price' => $total_price
         ]);
+        $owner = $reservation->apartment->user;
+        $notification = new NewReservationNotification(
+            $reservation->id,
+            $reservation->user->name
+        );
+        $owner->notify($notification);
+        $notification->sendFCM($owner);
         return response()->json([
             'message' => 'Reservation updated successfully',
             'reservation' => $reservation->fresh()
         ], 200);
     }
     //===================================Cancel==============================================
-    public function cancelReservation(Reservations $reservation)
+    public function cancelReservation(Request $request)
     {
+        $request->validate([
+            'reservation_id' => 'required|exists:reservations,id'
+        ]);
+        $reservation = Reservations::findOrFail($request->reservation_id);
         $this->authorize('cancel', $reservation);
         if ($reservation->isCancelled()) {
             return response()->json(['message' => 'Reservation is already cancelled'], 200);
@@ -93,18 +131,39 @@ class ReservationsController extends Controller
         $userId = $request->user()->id;
         $statusFilter = $request->query('status');
 
+        $query = Reservations::with(['apartment.images'])->forUser($userId);
+
         if ($statusFilter) {
-            $query = Reservations::forUser($userId);
+            // $query = Reservations::forUser($userId);
 
             if ($statusFilter === 'finished') {
                 $data = $query->status('finished')->get()
                     ->map(function ($reservation) {
 
                         $reservation->display_status = 'finished';
+
+                        $reservation->apartment_details = [
+                            'name' => $reservation->apartment->title ?? null,
+                            'price' => $reservation->apartment->price ?? null,
+                            'city' => $reservation->apartment->city ?? null,
+                            'first_image' => $reservation->apartment->images->first()
+                                ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                                : null
+                        ];
                         return $reservation;
                     });
             } else {
-                $data = $query->status($statusFilter)->get();
+                $data = $query->status($statusFilter)->get()->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    return $reservation;
+                });
             }
 
             return response()->json([
@@ -112,30 +171,97 @@ class ReservationsController extends Controller
                 'data' => $data
             ], 200);
         }
+
         return response()->json([
-            'pending' => Reservations::forUser($userId)
+            'pending' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('pending')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
+                    return $reservation;
+                }),
 
-            'confirmed' => Reservations::forUser($userId)
+            'confirmed' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('confirmed')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
 
-            'finished' => Reservations::forUser($userId)
+                    return $reservation;
+                }),
+
+            'finished' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('finished')
                 ->get()
                 ->map(function ($reservation) {
                     $reservation->display_status = 'finished';
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
+
                     return $reservation;
                 }),
 
-            'cancelled' => Reservations::forUser($userId)
+            'cancelled' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('cancelled')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
 
-            'rejected' => Reservations::forUser($userId)
+                    return $reservation;
+                }),
+
+            'rejected' => Reservations::with(['apartment.images'])
+                ->forUser($userId)
                 ->status('rejected')
-                ->get(),
+                ->get()
+                ->map(function ($reservation) {
+                    $reservation->apartment_details = [
+                        'title' => $reservation->apartment->title ?? null,
+                        'price' => $reservation->apartment->price ?? null,
+                        'city' => $reservation->apartment->city ?? null,
+                        'first_image' => $reservation->apartment->images->first()
+                            ? asset('storage/' . $reservation->apartment->images->first()->apartment_image_path)
+                            : null
+                    ];
+                    unset($reservation->apartment);
+
+                    return $reservation;
+                }),
         ], 200);
     }
     //===========================================all reservaions in app=================================
@@ -147,9 +273,10 @@ class ReservationsController extends Controller
             }
             return $res;
         });
-        return response()->json($reservations, 200);
+        $ans = $reservations->paginate(8);
+        return response()->json($ans, 200);
     }
-    //===================================accept the reservaiont before owner===================================
+    //===================================approved by owner===================================
     public function approveReservation(Reservations $reservation, Request $request)
     {
         $this->authorize('approve', $reservation);

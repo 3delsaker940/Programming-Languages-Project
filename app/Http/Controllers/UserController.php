@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ApartmentResource;
 use App\Models\User;
 use App\Models\Apartment;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class UserController extends Controller
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         $favorites = $user->favoritesApartment()->get();
-        return response()->json($favorites, 200);
+        return ApartmentResource::collection($favorites);
     }
     public function checkIfFavorite($apartmentId)
     {

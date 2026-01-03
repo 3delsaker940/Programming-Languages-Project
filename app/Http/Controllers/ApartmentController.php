@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RateApartmentRequest;
+use App\Models\Rating;
 use App\Models\User;
 
 class ApartmentController extends Controller
@@ -58,7 +60,9 @@ class ApartmentController extends Controller
         });
 
 
-        return response()->json($apartmentWithImages, 200);
+        return response()->json([
+            'message' => "Created Successfully"
+        ], 201);
     }
 
 
@@ -191,6 +195,21 @@ class ApartmentController extends Controller
             ->paginate(8);
 
         return ApartmentResource::collection($apartments);
+    }
+
+
+    public function rateAnApartment(RateApartmentRequest $request)
+    {
+        $apartment = Apartment::findOrFail($request->apartment_id);
+        $this->authorize('canRate', $apartment);
+        $user = Auth::user();
+        Rating::updateOrCreate(
+            ['user_id' => $user->id, 'apartment_id' => $apartment->id],
+            ['rate' => $request->rate, 'comment' => $request->comment]
+        );
+        $avg = Rating::where('apartment_id', $apartment->id)->avg('rate') ?? 0;
+        $apartment->update(['rate' => $avg]);
+        return response()->json(['message' => 'Rated successfully'], 200);
     }
 
     //=====for test to delete user + his files =======================

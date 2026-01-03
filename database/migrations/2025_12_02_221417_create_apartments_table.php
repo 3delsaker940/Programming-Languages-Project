@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('bathrooms')->index();
             $table->enum('type', ['apartment', 'house', 'villa', 'otherwise']);
             $table->integer('area')->index();
+            $table->decimal('rate')->nullable();
             $table->decimal('price', 10, 2)->index();
             $table->enum('city', [
                 'damascus',
