@@ -45,20 +45,20 @@ class User extends Authenticatable
     }
 
     //==============for delete user + his file ==============
-    // protected static function boot()
-    //     {
-    //             parent::boot();
+    protected static function boot()
+        {
+                parent::boot();
 
-    //             static::deleting(function ($user) {
+                static::deleting(function ($user) {
 
-    //             $folder = "apartments/{$user->id}";
+                $folder = "apartments/{$user->id}";
 
-    //             if (\Storage::disk('public')->exists($folder)) {
-    //                 \Storage::disk('public')->deleteDirectory($folder);
-    //             }
+                if (\Storage::disk('public')->exists($folder)) {
+                    \Storage::disk('public')->deleteDirectory($folder);
+                }
 
-    //         });
-    //     }
+            });
+        }
     //========================================================
 
 }

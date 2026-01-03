@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -11,14 +12,26 @@ Route::get('/admin', function() {
     return view('admin.dashboard');
 });
 
-Route::get('/admin/test', function() {
-    // جلب أول 5 مستخدمين من جدول users
-    $users = DB::table('users')->limit(5)->get();
-    return view('admin.test', ['users' => $users]);
-});
+Route::get('/admin/login', [AuthController::class, 'showLogin'])
+    ->middleware('guest')
+    ->name('admin.login');
+
+Route::post('/admin/login', [AuthController::class, 'loginAdmin'])
+    ->middleware('guest')
+    ->name('admin.login.post');
+
+Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])
+    ->middleware('auth')
+    ->name('admin.logout');
 
 //=============================
 Route::get('admin/users', function(){
-    $user = DB::table('users')->get();
-    return view('admin.users', ['users' => $user]);
-});
+    $users = DB::table('users')->get();
+    $apartments = DB::table('apartments')->get();
+    return view('admin.users', compact('users', 'apartments'));
+})->middleware('auth','admin')->name('admin.users');
+
+
+
+// Route::delete('/user/delete/{user}', [AdminController::class, 'deleteUser'])->name('user.delete');
+
