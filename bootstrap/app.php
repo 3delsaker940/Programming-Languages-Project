@@ -4,6 +4,7 @@ use App\Http\Middleware\CheckUserStatus;
 use App\Http\Middleware\EnsureOwner;
 use App\Http\Middleware\EnsureTenants;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\SetLocal;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,11 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+        $middleware->appendToGroup('web', [SetLocal::class,]);
+
         $middleware->alias([
             'active' => CheckUserStatus::class,
             'admin' => EnsureUserIsAdmin::class,
             'tenant' => EnsureTenants::class,
-            'owner'  => EnsureOwner::class,
+            'owner' => EnsureOwner::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -3,19 +3,19 @@
 @section('content')
 
     <div class="flex justify-between items-center mb-6 ">
-        <h2 class="text-2xl font-bold">User Management</h2>
+        <h2 class="text-2xl font-bold">{{ __('admin.user_management') }}</h2>
 
         <div class="flex items-center gap-4">
             <div
                 class="bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold shadow flex items-center gap-2 transition transform hover:scale-110">
                 <span class="text-lg">🏡</span>
-                <span>{{ $apartments->count() }} Properties</span>
+                <span>{{ $apartments->count() }} {{ __('admin.properties') }}</span>
             </div>
 
             <div
                 class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold shadow flex items-center gap-2 transition transform hover:scale-110">
                 <span class="text-lg">👤</span>
-                <span>{{ $users->count() }} Users</span>
+                <span>{{ $users->count() }} {{ __('admin.users') }}</span>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
 
     <div class="mb-4 flex justify-center">
         <div class="relative w-full max-w-md">
-            <input type="text" id="search" placeholder="Search users..."
+            <input type="text" id="search" placeholder="{{ __('admin.search_users') }}"
                 class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 shadow-m focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-colors duration-200">
             <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-200">
                 🔍
@@ -38,14 +38,12 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-start">{{ __('admin.id') }}</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-start">{{ __('admin.first_name') }}</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-start">{{ __('admin.last_name') }}</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-start">{{ __('admin.type') }}</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-start">{{ __('admin.status') }}</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-start">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -68,16 +66,16 @@
                         </td>
                         <td class="px-6 py-4 space-x-2">
                             <button data-user-id="{{ $user->id }}" data-status="active"
-                                class="status-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs active:translate-y-1">Active</button>
+                                class="status-btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs active:translate-y-1">{{ __('admin.active') }}</button>
                             <button data-user-id="{{ $user->id }}" data-status="pending"
-                                class="status-btn bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 text-xs active:translate-y-1">Pending</button>
+                                class="status-btn bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 text-xs active:translate-y-1">{{ __('admin.pending') }}</button>
                             <button data-user-id="{{ $user->id }}" data-status="rejected"
-                                class="status-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs active:translate-y-1">Rejected</button>
+                                class="status-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs active:translate-y-1">{{ __('admin.rejected') }}</button>
                             <button data-user-id="{{ $user->id }}" data-status="frozen"
-                                class="status-btn bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 text-xs active:translate-y-1">Frozen</button>
+                                class="status-btn bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 text-xs active:translate-y-1">{{ __('admin.frozen') }}</button>
                             <button data-user-id="{{ $user->id }}"
                                 class="delete-user-btn bg-red-400 text-white font-bold px-3 py-1 ml-8 rounded-full hover:bg-red-800 text-xs transition transform hover:scale-105 shadow-md"
-                                title="Delete User">Delete🗑</button>
+                                title="Delete User">{{ __('admin.delete_user') }}</button>
                         </td>
                     </tr>
                 @endforeach
@@ -93,22 +91,22 @@
             class="bg-white rounded-lg w-11/12 md:w-3/4 lg:w-1/2 p-6 relative max-h-[90vh] overflow-y-auto transform transition-transform duration-300 scale-95">
             
             <button id="closeModal"
-                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+                class="absolute top-4 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold rtl:left-5 rtl:right-auto">&times;</button>
 
             
-            <h2 class="text-2xl font-bold mb-4" id="modalName">User Details</h2>
+            <h2 class="text-2xl font-bold mb-4" id="modalName">{{ __('admin.user_details') }}</h2>
 
             
             <div class="flex border-b mb-4">
                 <button
                     class="tab-btn px-4 py-2 text-blue-600 font-semibold border-b-2 border-blue-600 focus:outline-none transition-transform transform hover:-translate-y-1 hover:shadow-lg duration-200 cursor-pointer"
-                    data-tab="general">General</button>
+                    data-tab="general">{{ __('admin.general') }}</button>
                 <button
                     class="tab-btn px-4 py-2 text-gray-500 font-semibold border-b-2 border-transparent focus:outline-none transition-transform transform hover:-translate-y-1 hover:shadow-lg duration-200 cursor-pointer"
-                    data-tab="apartments">Apartments</button>
+                    data-tab="apartments">{{ __('admin.properties') }}</button>
                 <button
                     class="tab-btn px-4 py-2 text-gray-500 font-semibold border-b-2 border-transparent focus:outline-none transition-transform transform hover:-translate-y-1 hover:shadow-lg duration-200 cursor-pointer"
-                    data-tab="reservations">Reservations</button>
+                    data-tab="reservations">{{ __('admin.reservation') }}</button>
             </div>
 
             
@@ -116,16 +114,15 @@
                 <div id="general" class="tab-content">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-gray-50 p-4 rounded shadow space-y-2">
-                            <p><strong>First Name:</strong> <span id="modalFirstName"></span></p>
-                            <p><strong>Last Name:</strong> <span id="modalLastName"></span></p>
-                            <p><strong>Birthdate:</strong> <span id="modalBirthdate"></span></p>
-                            <p><strong>Number:</strong> <span id="modalNumber"></span></p>
-                            <p><strong>Status:</strong> <span id="modalStatus" class="px-2 py-1 rounded text-white"></span>
-                            </p>
-                            <p><strong>Type:</strong> <span id="modalType"></span></p>
+                            <p><strong>{{ __('admin.first_name') }} :</strong> <span id="modalFirstName"></span></p>
+                            <p><strong>{{ __('admin.last_name') }} :</strong> <span id="modalLastName"></span></p>
+                            <p><strong>{{ __('admin.birthdate') }} :</strong> <span id="modalBirthdate"></span></p>
+                            <p><strong>{{ __('admin.number') }} :</strong> <span id="modalNumber"></span></p>
+                            <p><strong>{{ __('admin.status') }} :</strong> <span id="modalStatus" class="px-2 py-1 rounded text-white"></span></p>
+                            <p><strong>{{ __('admin.type') }}:</strong> <span id="modalType"></span></p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded shadow space-y-2">
-                            <p class="font-semibold">ID Photos:</p>
+                            <p class="font-semibold">{{ __('admin.id_photos') }}:</p>
                             <img id="modalIdFront"
                                 class="border rounded cursor-pointer w-full max-w-xs hover:scale-105 transition-transform"
                                 src="placeholder.jpg" alt="ID Front">
@@ -328,12 +325,12 @@
 
                                 card.innerHTML = `
                                                         <div class="space-y-1 ">
-                                                            <p><strong>Title:</strong> ${apartment.title ?? '-'}</p>
-                                                            <p><strong>Price:</strong> ${apartment.price ?? '-'}</p>
-                                                            <p><strong>Area:</strong> ${apartment.area ?? '-'} m²</p>
-                                                            <p><strong>Rooms:</strong> ${apartment.rooms ?? '-'}</p>
-                                                            <p><strong>City:</strong> ${apartment.city ?? '-'}</p>
-                                                            <p><strong>Type:</strong> ${apartment.type ?? '-'}</p>
+                                                            <p><strong>{{ __('admin.title') }} :</strong> ${apartment.title ?? '-'}</p>
+                                                            <p><strong>{{ __('admin.price') }} :</strong> ${apartment.price ?? '-'}</p>
+                                                            <p><strong>{{ __('admin.area') }} :</strong> ${apartment.area ?? '-'} m²</p>
+                                                            <p><strong>{{ __('admin.rooms') }} :</strong> ${apartment.rooms ?? '-'}</p>
+                                                            <p><strong>{{ __('admin.city') }} :</strong> ${apartment.city ?? '-'}</p>
+                                                            <p><strong>{{ __('admin.type') }} :</strong> ${apartment.type ?? '-'}</p>
                                                         </div>
 
                                                         <button
@@ -341,14 +338,14 @@
                                                             data-apartment-id="${apartment.id}"
                                                             title="Delete Apartment"
                                                         >
-                                                            Delete🗑
+                                                            {{ __('admin.delete_user') }}
                                                         </button>
                                                     `;
 
                                 modalApartments.appendChild(card);
                             });
                         } else {
-                            modalApartments.innerHTML = '<p class="text-gray-500">No apartments</p>';
+                            modalApartments.innerHTML = '<p class="text-gray-500">{{ __('admin.no_apartments') }}</p>';
                         }
 
                         // ====================== Reservations =========================
@@ -372,7 +369,7 @@
                                 modalReservation.appendChild(card);
                             });
                         } else {
-                            modalReservation.innerHTML = '<p class="text-gray-500">No Reservations</p>';
+                            modalReservation.innerHTML = '<p class="text-gray-500">{{ __('admin.no_reservations') }}</p>';
                         }
 
                         modal.classList.remove('hidden');

@@ -25,11 +25,23 @@ Route::post('/admin/logout', [AuthController::class, 'logoutAdmin'])
     ->name('admin.logout');
 
 //=============================
+
 Route::get('admin/users', function(){
     $users = DB::table('users')->get();
     $apartments = DB::table('apartments')->get();
     return view('admin.users', compact('users', 'apartments'));
 })->middleware('auth','admin')->name('admin.users');
+
+//============================================
+
+Route::get('/lang/{lang}', function ($lang) {
+    if (!in_array($lang, ['en', 'ar'])) {
+        abort(400);
+    }
+
+    session(['locale' => $lang]);
+    return redirect()->back();
+})->name('lang.switch');
 
 
 
