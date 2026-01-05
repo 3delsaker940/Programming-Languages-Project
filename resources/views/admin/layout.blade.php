@@ -17,7 +17,7 @@
                 <li class="mb-5 font-semibold"><a href="#" class="">{{ __('admin.team') }}</a></li>
 
                 <li class="mb-3"><a href="#" class="hover:text-gray-400">{{ __('admin.mohammed_aldebes') }}</a></li>
-                <li class="mb-3"><a href="#" class="hover:text-gray-400">{{ __('admin.adel_sakr') }}</a></li>
+                <li class="mb-3"><a href="#" class="hover:text-gray-400">{{ __('admin.mhd_adel_saker') }}</a></li>
                 <li class="mb-3"><a href="#" class="hover:text-gray-400">{{ __('admin.mutaz') }}</a></li>
                 <li class="mb-3"><a href="#" class="hover:text-gray-400">{{ __('admin.omar') }}</a></li>
                 <li class="mb-3"><a href="#" class="hover:text-gray-400">{{ __('admin.batoul') }}</a></li>

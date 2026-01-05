@@ -7,11 +7,17 @@ use App\Models\User;
 use App\Models\Apartment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function ToggleFavorite($apartmentId)
+    public function ToggleFavorite(Request $request)
     {
+
+        $request->validate([
+            'apartmentId' => 'required|integer|exists:apartments,id',
+        ]);
+        $apartmentId = $request->apartmentId;
         Apartment::findOrFail($apartmentId);
         /** @var \App\Models\User|null $user */
         $user = Auth::user();

@@ -75,16 +75,4 @@ Route::middleware(['admin'])->group(function () {
     Route::get('user/id-photo/front/{id}', [UserController::class, 'idPhotoFront']);
     Route::delete('user/delete/{user}', [AdminController::class, 'deleteUser']);
     Route::delete('apartments/{apartment}', [AdminController::class, 'destroy']);
-
 });
-
-
-
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::put('users/{user}/status', [AdminController::class, 'updateStatus']);
-    Route::put('user/verfied/{id}', [UserController::class, 'ChangeUserStatusToActive']);
-    Route::get('user/id-photo/front/{id}', [UserController::class, 'idPhotoFront']);
-    Route::get('view-all-reservations', [ReservationsController::class, 'allReservations']);
-    Route::get('user/id-photo/back/{id}', [UserController::class, 'idPhotoBack']);
-});
-

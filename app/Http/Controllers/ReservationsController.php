@@ -20,8 +20,8 @@ class ReservationsController extends Controller
         $endDate = new Carbon($data['end_date']);
         $apartmentId = $data['apartment_id'];
         $userId = $request->user()->id;
-        $user= $request->user;
-        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId,$user) {
+        $user = $request->user();
+        return DB::transaction(function () use ($startDate, $endDate, $apartmentId, $userId, $user) {
             $apartment = Apartment::where('id', $apartmentId)->lockForUpdate()->first();
             if (!$apartment) {
                 return response()->json(['message' => 'Apartment not found'], 404);
@@ -49,11 +49,11 @@ class ReservationsController extends Controller
             );
             $owner->notify($notification);
             $notification->sendFCM($owner);
-                return response()->json([
-                    'message' => "Booked Successfully",
-                    'Total Cost' => $total_price
-                ], 201);
-            });
+            return response()->json([
+                'message' => "Booked Successfully",
+                'Total Cost' => $total_price
+            ], 201);
+        });
     }
     //=============================Update=======================================================
 
@@ -85,9 +85,9 @@ class ReservationsController extends Controller
             return response()->json(['message' => 'Dates are conflicting'], 422);
         }
         $reservation->apartment->user
-        ->notifications()
-        ->where('data->reservation_id', $reservation->id)
-        ->delete();
+            ->notifications()
+            ->where('data->reservation_id', $reservation->id)
+            ->delete();
         $reservation->update([
             'start_date' => $startAt,
             'end_date' => $endAt,

@@ -9,7 +9,7 @@ return [
     'logout' => 'Log Out',
     'delete_user' => 'Delete 🗑',
     'mohammed_aldebes' => 'Mohammed Aldebes',
-    'adel_sakr' => 'Adel Sakr',
+    'mhd_adel_saker' => 'Mohammed Adel Saker',
     'mutaz' => 'Mutaz Al-homsi',
     'omar' => 'Omar Alaa-al-dein',
     'batoul' => 'Batoul Suliman',
