@@ -25,7 +25,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         return $request->user();
     });
     Route::prefix('favorites')->group(function () {
-        Route::post('/toggle/{apartmentId}', [UserController::class, 'ToggleFavorite']);
+        Route::post('/toggle', [UserController::class, 'ToggleFavorite']);
         Route::post('/add/{apartmentId}', [UserController::class, 'addToFavorites']);
         Route::delete('/remove/{apartmentId}', [UserController::class, 'removeFromFavorites']);
         Route::get('/get', [UserController::class, 'getFavorites']);
