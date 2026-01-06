@@ -26,10 +26,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
     Route::prefix('favorites')->group(function () {
         Route::post('/toggle', [UserController::class, 'ToggleFavorite']);
-        Route::post('/add/{apartmentId}', [UserController::class, 'addToFavorites']);
-        Route::delete('/remove/{apartmentId}', [UserController::class, 'removeFromFavorites']);
+        Route::post('/add', [UserController::class, 'addToFavorites']);
+        Route::delete('/remove', [UserController::class, 'removeFromFavorites']);
         Route::get('/get', [UserController::class, 'getFavorites']);
-        Route::get('/check/{apartmentId}', [UserController::class, 'checkIfFavorite']);
+        Route::get('/check', [UserController::class, 'checkIfFavorite']);
     });
 
 

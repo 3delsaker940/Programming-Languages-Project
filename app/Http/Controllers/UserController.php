@@ -13,7 +13,6 @@ class UserController extends Controller
 {
     public function ToggleFavorite(Request $request)
     {
-
         $request->validate([
             'apartmentId' => 'required|integer|exists:apartments,id',
         ]);
@@ -34,8 +33,12 @@ class UserController extends Controller
             ], 200);
         }
     }
-    public function addToFavorites($apartmentId)
+    public function addToFavorites(Request $request)
     {
+        $request->validate([
+            'apartmentId' => 'required|integer|exists:apartments,id',
+        ]);
+        $apartmentId = $request->apartmentId;
         Apartment::findOrFail($apartmentId);
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -44,8 +47,12 @@ class UserController extends Controller
             'message' => 'Apartment added to favorites successfully'
         ], 200);
     }
-    public function removeFromFavorites($apartmentId)
+    public function removeFromFavorites(Request $request)
     {
+        $request->validate([
+            'apartmentId' => 'required|integer|exists:apartments,id',
+        ]);
+        $apartmentId = $request->apartmentId;
         Apartment::findOrFail($apartmentId);
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
@@ -61,8 +68,12 @@ class UserController extends Controller
         $favorites = $user->favoritesApartment()->get();
         return ApartmentResource::collection($favorites);
     }
-    public function checkIfFavorite($apartmentId)
+    public function checkIfFavorite(Request $request)
     {
+        $request->validate([
+            'apartmentId' => 'required|integer|exists:apartments,id',
+        ]);
+        $apartmentId = $request->apartmentId;
         Apartment::findOrFail($apartmentId);
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
