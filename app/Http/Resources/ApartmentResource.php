@@ -9,7 +9,9 @@ class ApartmentResource extends JsonResource
 {
     public function toArray($request): array
     {
-        $user = User::findOrFail($this->owner_id);
+        $owner = User::findOrFail($this->owner_id);
+        $user = $request->user();
+        $is_favorite = $user->favoritesApartment()->where('apartment_id', $this->id)->exists();
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -22,6 +24,7 @@ class ApartmentResource extends JsonResource
             'rooms' => $this->rooms,
             'bathrooms' => $this->bathrooms,
             'status' => $this->status,
+            'is_favorite' => $is_favorite,
             'images' => $this->images->map(function ($image) {
                 return [
                     'id' => $image->id,
@@ -29,10 +32,10 @@ class ApartmentResource extends JsonResource
                 ];
             }),
             'owner' => [
-                'id' => $user->id,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'profile_photo' => asset('storage/' . $user->profile_photo)
+                'id' => $owner->id,
+                'first_name' => $owner->first_name,
+                'last_name' => $owner->last_name,
+                'profile_photo' => asset('storage/' . $owner->profile_photo)
             ],
         ];
     }

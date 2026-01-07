@@ -35,13 +35,20 @@ class ApartmentPolicy
         return $user->type === 'tenant' && $apartment->status === 'available';
     }
 
-    public function canRate(User $user, Apartment $apartment): bool
+    public function canRate(User $user, Apartment $apartment): Response
     {
-        return Reservations::query()
+        $q = Reservations::query()
             ->where('user_id', $user->id)
-            ->where('apartment_id', $apartment->id)
-            ->where('status', 'confirmed')
-            ->where('end_date', '<=', now())
-            ->exists();
+            ->where('apartment_id', $apartment->id);
+        if (!$q->exists()) {
+            return Response::deny('You have not reserved this apartment before.');
+        }
+        if (!$q->where('status', 'confirmed')) {
+            return Response::deny('You can only rate after a confirmed reservation.');
+        }
+        if (!$q->where('end_date', '<=', now())->exists()) {
+            return Response::deny('You can only rate after finishing your stay.');
+        }
+        return Response::allow();
     }
 }
