@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     });
     Route::middleware(['auth:sanctum', 'owner'])->group(function () {
         Route::post('reservations/{reservation}/approve', [ReservationsController::class, 'approveReservation']);
+        Route::get('/owner/reservations',[ReservationsController::class, 'ownerReservations']);
     });
 });
 

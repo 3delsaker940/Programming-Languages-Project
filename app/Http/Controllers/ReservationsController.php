@@ -302,4 +302,38 @@ class ReservationsController extends Controller
             'reservation' => $reservation
         ], 200);
     }
+    public function ownerReservations(Request $request)
+    {
+        $ownerId = $request->user()->id;
+        $reservations = Reservations::with([
+            'user:id,first_name,last_name,profile_photo',
+            'apartment:id,title,owner_id'
+        ])
+        ->whereHas('apartment', function ($query) use ($ownerId) {
+        $query->where('owner_id', $ownerId);
+        })
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($reservation) {
+            return [
+                'reservation_id' => $reservation->id,
+                'renter_id' => $reservation->user->id,
+                'renter_name' => trim(
+                    $reservation->user->first_name . ' ' . $reservation->user->last_name
+                    ),
+                'renter_profile_photo' => $reservation->user->profile_photo,
+                'apartment_id' => $reservation->apartment->id,
+                'apartment_title' => $reservation->apartment->title,
+                'status' => $reservation->status,
+                'start_date' => $reservation->start_date,
+                'end_date' => $reservation->end_date,
+                'total_price' => $reservation->total_price,
+                'created_at' => $reservation->created_at,
+            ];
+        });
+        return response()->json([
+        'count' => $reservations->count(),
+        'data' => $reservations
+        ], 200);
+    }
 }
