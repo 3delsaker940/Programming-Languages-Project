@@ -277,15 +277,17 @@ class ReservationsController extends Controller
         return response()->json($ans, 200);
     }
     //===================================approved by owner===================================
-    public function approveReservation(Reservations $reservation, Request $request)
+    public function approveReservation(Request $request)
     {
+        $data = $request->validate([
+            'reservation_id' => 'required|exists:reservations,id',
+            'action' => 'required|in:approve,reject'
+        ]);
+        $reservation = Reservations::find($request->reservation_id);
         $this->authorize('approve', $reservation);
         if ($reservation->status !== 'pending') {
             return response()->json(['message' => 'the reservations is not pending'], 400);
         }
-        $data = $request->validate([
-            'action' => 'required|in:approve,reject'
-        ]);
         if ($data['action'] === 'reject') {
             $reservation->update(['status' => 'rejected']);
             return response()->json([
@@ -309,31 +311,31 @@ class ReservationsController extends Controller
             'user:id,first_name,last_name,profile_photo',
             'apartment:id,title,owner_id'
         ])
-        ->whereHas('apartment', function ($query) use ($ownerId) {
-        $query->where('owner_id', $ownerId);
-        })
+            ->whereHas('apartment', function ($query) use ($ownerId) {
+                $query->where('owner_id', $ownerId);
+            })
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($reservation) {
-            return [
-                'reservation_id' => $reservation->id,
-                'renter_id' => $reservation->user->id,
-                'renter_name' => trim(
-                    $reservation->user->first_name . ' ' . $reservation->user->last_name
+                return [
+                    'reservation_id' => $reservation->id,
+                    'renter_id' => $reservation->user->id,
+                    'renter_name' => trim(
+                        $reservation->user->first_name . ' ' . $reservation->user->last_name
                     ),
-                'renter_profile_photo' => $reservation->user->profile_photo,
-                'apartment_id' => $reservation->apartment->id,
-                'apartment_title' => $reservation->apartment->title,
-                'status' => $reservation->status,
-                'start_date' => $reservation->start_date,
-                'end_date' => $reservation->end_date,
-                'total_price' => $reservation->total_price,
-                'created_at' => $reservation->created_at,
-            ];
-        });
+                    'renter_profile_photo' => $reservation->user->profile_photo,
+                    'apartment_id' => $reservation->apartment->id,
+                    'apartment_title' => $reservation->apartment->title,
+                    'status' => $reservation->status,
+                    'start_date' => $reservation->start_date->format('Y/m/d'),
+                    'end_date' => $reservation->end_date->format('Y/m/d'),
+                    'total_price' => $reservation->total_price,
+                    'created_at' => $reservation->created_at,
+                ];
+            });
         return response()->json([
-        'count' => $reservations->count(),
-        'data' => $reservations
+            'count' => $reservations->count(),
+            'data' => $reservations
         ], 200);
     }
 }
