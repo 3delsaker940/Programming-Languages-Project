@@ -54,18 +54,24 @@ class AuthController extends Controller
                 'string',
                 'regex:/^(?:\+9639|09|009639)\d{8}$/'
             ],
-            'password' => 'required|string'
+            'password' => 'required|string',
+            'fcm_token' => 'nullable|string'
         ]);
+
         if (!Auth::attempt($request->only('number', 'password'))) {
-            return response()->json(
-                [
-                    'message' => 'invalid number or password'
-                ],
-                401
-            );
+            return response()->json([
+            '     message' => 'invalid number or password'
+            ], 401);
         }
+
         $user = User::where('number', $request->number)->firstOrFail();
+        if ($request->filled('fcm_token')) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
+        }
+
         $token = $user->createToken('auth_Token')->plainTextToken;
+
         return response()->json([
             'message' => 'logged in successfully',
             'User' => $user,
@@ -73,13 +79,6 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json([
-            'message' => 'logged out successfully'
-        ]);
-    }
 
     //=================================================================
 
