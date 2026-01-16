@@ -15,6 +15,7 @@ return new class extends Migration
             $table->date('birthdate');
             $table->string('number')->unique();
             $table->string('password');
+            $table->string('fcm_token')->nullable();
             $table->string('profile_photo');
             $table->string('id_photo_front');
             $table->string('id_photo_back');
