@@ -60,7 +60,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('number', 'password'))) {
             return response()->json([
-            '     message' => 'invalid number or password'
+                '     message' => 'invalid number or password'
             ], 401);
         }
 
@@ -79,6 +79,13 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'message' => 'logged out successfully'
+        ]);
+    }
 
     //=================================================================
 
