@@ -1,0 +1,50 @@
+<?php
+
+return [
+    'admin_panel' => 'لوحة التحكم',
+    'user_management' => 'إدارة المستخدمين',
+    'search_users' => 'البحث عن مستخدم...',
+    'properties' => 'العقارات',
+    'users' => 'المستخدمون',
+    'logout' => 'تسجيل الخروج',
+    'delete_user' => 'حذف 🗑',
+    'mohammed_aldebes' => 'محمد الدبس',
+    'mhd_adel_saker' => 'محمد عادل سقر',
+    'mutaz' => 'معتز الحمصي',
+    'omar' => 'عمر علاء الدين',
+    'batoul' => 'بتول سليمان',
+    'team' => 'الفريق :',
+
+    'id' => 'المعرّف',
+    'first_name' => 'الأسم الأول',
+    'last_name' => 'الأسم الأخير',
+    'type' => 'النوع',
+    'status' => 'الحالة',
+    'actions' => 'الإجراءات',
+    'number' => 'الرقم',
+
+    'active' => 'مُفعَّل',
+    'pending' => 'قيد المراجعة',
+    'rejected' => 'مرفوض',
+    'frozen' => 'مجمّد',
+
+    'general' => 'العام',
+    'user_details' => 'معلومات المستخدم',
+    'birthdate' => 'تاريخ الميلاد',
+    'id_photos' => 'صور الهوية',
+    'reservation' => 'الحجوزات',
+    'no_apartments' => 'لا يوجد عقارات',
+    'no_reservations' => 'لا يوجد حجوزات',
+
+    'title' => 'العنوان',
+    'price' => 'السعر',
+    'area' => 'المساحة',
+    'rooms' => 'الغرف',
+    'city' => 'المدينة',
+
+    'admin_login' => 'تسجيل دخول المدير',
+    'phone_number' => 'رقم الهاتف',
+    'password' => 'كلمة المرور',
+    'login' => ' تسجيل الدخول',
+
+];

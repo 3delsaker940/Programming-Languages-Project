@@ -14,7 +14,7 @@ class EnsureUserIsAdmin
         if ($user && $user->type !== 'admin') {
             return response()->json([
                 'message' => 'Just admins can access this route.',
-                'You account type' => $user->type
+                'Your account type' => $user->type
             ], 403);
         }
         return $next($request);
